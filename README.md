@@ -1,0 +1,1 @@
+# simulador-vida-android
