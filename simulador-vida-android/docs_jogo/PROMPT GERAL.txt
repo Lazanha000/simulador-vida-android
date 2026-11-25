@@ -1,0 +1,534 @@
+# PROMPT-MESTRE — DESENVOLVIMENTO DE UM SIMULADOR DE VIDA BRASILEIRO
+
+## 1. SUA FUNÇÃO
+
+Você será o principal arquiteto de software, programador e responsável técnico pelo desenvolvimento de um simulador de vida complexo, modular, expansível e funcional.
+
+Não quero apenas um protótipo visual, uma demonstração conceitual ou uma interface com botões sem funcionalidades reais. Quero um jogo efetivamente jogável, com sistemas interdependentes, persistência de dados e simulação consistente.
+
+O projeto será desenvolvido incrementalmente, por microatualizações e pequenas versões funcionais.
+
+**IMPORTANTE: meu acesso ao Claude é limitado. Portanto, otimize rigorosamente o consumo de contexto e mensagens.**
+
+Evite:
+- Explicações excessivamente longas.
+- Repetir informações já documentadas.
+- Reescrever arquivos inteiros sem necessidade.
+- Reconstruir módulos que já funcionam.
+- Criar abstrações desnecessárias.
+- Implementar funcionalidades decorativas antes das funcionais.
+- Tentar desenvolver todos os sistemas simultaneamente.
+
+Priorize código funcional, arquitetura consistente, documentação objetiva e continuidade entre sessões.
+
+## 2. CONCEITO DO JOGO
+
+Desenvolver um simulador de vida ambientado no Brasil, no qual o jogador possa criar personagens de qualquer idade ou criar famílias inteiras.
+
+O jogador poderá acompanhar uma vida desde o nascimento até a velhice, ou iniciar uma simulação com personagens adultos.
+
+Não existe uma trajetória obrigatória. O jogador poderá estudar, trabalhar, empreender, constituir família, desenvolver conhecimentos, participar da política, adquirir patrimônio, mudar de cidade ou simplesmente viver sem objetivos específicos.
+
+O jogo combinará:
+- Simulação de vida.
+- RPG de progressão.
+- Sandbox.
+- Simulação econômica.
+- Simulação social.
+- Formação educacional e intelectual.
+- Eventos aleatórios e acontecimentos históricos.
+
+A referência de jogabilidade é BitLife, mas a profundidade sistêmica pretendida é significativamente maior.
+
+## 3. PRINCÍPIOS DE DESENVOLVIMENTO
+
+1. O jogo deve funcionar antes de ser expandido.
+2. Todos os sistemas devem compartilhar dados coerentes.
+3. Os personagens precisam ter autonomia.
+4. O mundo deve continuar funcionando independentemente do jogador.
+5. As decisões devem produzir consequências.
+6. O tempo precisa atualizar todos os sistemas.
+7. As partidas devem ser integralmente salvas.
+8. Novas funcionalidades devem ser incorporadas sem destruir as anteriores.
+9. O projeto deve permanecer executável em todas as atualizações.
+10. A arquitetura deve permitir expansão futura.
+
+Não implemente um sistema apenas para preencher uma interface. Toda funcionalidade apresentada ao jogador precisa ter comportamento real.
+
+## 4. SISTEMAS OBRIGATÓRIOS
+
+### 4.1. Personagens e psicologia
+
+Cada personagem deverá possuir:
+- Identidade e características individuais.
+- Data de nascimento e idade.
+- Personalidade e temperamento.
+- Interesses, valores e ambições.
+- Medos, hábitos e preferências.
+- Capacidades intelectuais.
+- Habilidades físicas e sociais.
+- Saúde e envelhecimento.
+- Histórico de vida.
+- Memórias de acontecimentos.
+- Objetivos individuais.
+
+Os NPCs devem possuir autonomia, relacionamentos, ocupações, rotinas e acontecimentos próprios.
+
+### 4.2. Educação brasileira
+
+Implementar:
+- Educação infantil.
+- Ensino fundamental.
+- Ensino médio.
+- Escolas públicas e privadas.
+- ENEM.
+- SISU.
+- PROUNI.
+- FIES.
+- Vestibulares.
+- Universidades públicas e privadas.
+- Institutos federais.
+- Cursos técnicos.
+- Graduações.
+- Licenciaturas e bacharelados.
+- Especializações.
+- Mestrados.
+- Doutorados.
+- Pós-doutorados.
+- Iniciação científica.
+- Bolsas acadêmicas.
+- Concursos públicos.
+
+Utilizar instituições reais brasileiras, incluindo UFMG, USP, Unicamp, UFRJ, UnB, UFBA, UFPE, UFRGS e outras.
+
+Os cursos devem possuir requisitos, duração, disciplinas, processos seletivos e possibilidades profissionais.
+
+Não inventar informações institucionais apresentadas como reais.
+
+### 4.3. Conhecimento e formação intelectual
+
+Este é um dos sistemas prioritários do projeto.
+
+Criar uma estrutura enciclopédica de conhecimentos, organizada em áreas, disciplinas e subdisciplinas.
+
+Áreas iniciais:
+- Filosofia.
+- Ciências sociais.
+- História.
+- Economia.
+- Direito.
+- Matemática.
+- Física.
+- Química.
+- Biologia.
+- Literatura.
+- Linguística.
+- Psicologia.
+- Geografia.
+- Artes.
+- Tecnologia.
+- Engenharia.
+
+Cada área deverá possuir subdivisões expansíveis.
+
+O personagem poderá:
+- Ler livros reais.
+- Estudar autonomamente.
+- Fazer cursos.
+- Frequentar universidades.
+- Participar de grupos de estudo.
+- Pesquisar.
+- Escrever trabalhos.
+- Produzir artigos.
+- Aprender idiomas.
+- Desenvolver competências argumentativas.
+- Consolidar conhecimentos através de revisões.
+
+O aprendizado deverá ser gradual e considerar dificuldade, compreensão, tempo de estudo, retenção e esquecimento.
+
+Os livros deverão possuir títulos e autores reais. Não inventar livros ou atribuir obras a autores incorretos.
+
+Criar um sistema de capacidades cognitivas:
+- Memória.
+- Atenção.
+- Raciocínio lógico.
+- Abstração.
+- Criatividade.
+- Compreensão verbal.
+- Resolução de problemas.
+- Aprendizagem.
+
+Incluir QI como indicador opcional, sem reduzi-lo a uma representação completa da inteligência.
+
+### 4.4. Trabalho e carreiras
+
+Criar um mercado profissional amplo e dinâmico.
+
+Incluir:
+- Emprego formal e informal.
+- Setor público e privado.
+- Concursos.
+- Empreendedorismo.
+- Trabalho autônomo.
+- Profissões liberais.
+- Carreiras acadêmicas.
+- Carreiras políticas.
+- Profissões técnicas.
+- Carreiras artísticas.
+
+Cada profissão terá requisitos, remuneração, competências, experiência, progressão e condições de trabalho.
+
+Empresas deverão possuir vagas, hierarquias, funcionários, produtividade e processos seletivos.
+
+Implementar contratação, promoção, demissão, desemprego, aposentadoria e mudanças profissionais.
+
+A formação acadêmica não deverá garantir automaticamente o sucesso profissional.
+
+### 4.5. Economia e finanças
+
+Implementar:
+- Salários.
+- Rendimentos.
+- Bancos.
+- Contas bancárias.
+- Despesas.
+- Impostos.
+- Dívidas.
+- Empréstimos.
+- Juros.
+- Crédito.
+- Investimentos.
+- Imóveis.
+- Empresas.
+- Heranças.
+- Aposentadoria.
+- Inflação.
+- Variações econômicas.
+
+Manter registros financeiros confiáveis, com receitas, despesas, patrimônio e histórico de transações.
+
+### 4.6. Relacionamentos e família
+
+Implementar relações complexas:
+- Amizade.
+- Namoro.
+- Casamento.
+- Separação.
+- Família.
+- Rivalidade.
+- Inimizade.
+- Relações profissionais.
+
+Cada relacionamento deverá possuir afinidade, confiança, intimidade, respeito, admiração, hostilidade e histórico.
+
+NPCs deverão lembrar de acontecimentos relevantes e reagir a experiências anteriores.
+
+Implementar gerações, nascimento, infância, adolescência, idade adulta, velhice e falecimento.
+
+### 4.7. Mundo e geografia brasileira
+
+O ambiente deverá representar o Brasil, com:
+- Estados.
+- Municípios.
+- Bairros.
+- Empresas.
+- Escolas.
+- Universidades.
+- Instituições.
+- Residências.
+
+Permitir migração entre cidades e estados.
+
+Começar com uma base geográfica expansível, sem exigir a implementação detalhada de todos os municípios na primeira versão.
+
+### 4.8. Política e participação social
+
+Implementar:
+- Partidos.
+- Sindicatos.
+- Movimentos sociais.
+- Organizações.
+- Eleições.
+- Campanhas.
+- Militância.
+- Cargos públicos.
+- Participação institucional.
+- Influência política.
+
+O personagem poderá construir uma trajetória política independente.
+
+### 4.9. Acontecimentos históricos e notícias
+
+O mundo deverá apresentar acontecimentos independentes do jogador:
+- Eleições.
+- Crises econômicas.
+- Pandemias.
+- Mudanças legislativas.
+- Transformações tecnológicas.
+- Acontecimentos nacionais.
+- Eventos culturais.
+
+Diferenciar acontecimentos históricos reais de eventos fictícios gerados pela simulação.
+
+### 4.10. Consumo e patrimônio
+
+Permitir adquirir, vender, alugar e administrar:
+- Imóveis.
+- Terrenos.
+- Veículos.
+- Móveis.
+- Equipamentos.
+- Livros.
+- Objetos pessoais.
+- Participações empresariais.
+
+### 4.11. Biografia e memória
+
+Criar um registro cronológico da vida do personagem.
+
+Registrar:
+- Nascimento.
+- Escolaridade.
+- Leituras.
+- Empregos.
+- Relacionamentos.
+- Casamentos.
+- Filhos.
+- Conquistas.
+- Fracassos.
+- Mudanças de residência.
+- Acontecimentos importantes.
+- Patrimônio.
+- Participação política.
+- Falecimentos familiares.
+
+Permitir consultar a biografia por períodos e categorias.
+
+## 5. SISTEMA TEMPORAL
+
+O jogo funcionará por turnos.
+
+O jogador poderá escolher:
+
+- Avançar um mês.
+- Avançar seis meses.
+- Avançar um ano.
+
+Cada turno deverá processar os acontecimentos intermediários em ordem cronológica.
+
+O motor deverá atualizar:
+- Idades.
+- Educação.
+- Empregos.
+- Salários.
+- Finanças.
+- Relacionamentos.
+- Saúde.
+- Eventos.
+- Empresas.
+- Instituições.
+- NPCs.
+- Acontecimentos nacionais.
+
+Eventos importantes poderão interromper a progressão e solicitar decisões.
+
+No final de cada turno, apresentar um relatório consolidado das mudanças relevantes.
+
+## 6. INTERFACE E JOGABILIDADE
+
+A interface deverá combinar:
+
+1. Painel principal do personagem.
+2. Painel de atributos.
+3. Painel de conhecimento.
+4. Painel educacional.
+5. Painel profissional.
+6. Painel financeiro.
+7. Painel de relacionamentos.
+8. Painel familiar.
+9. Painel de patrimônio.
+10. Painel político.
+11. Diário cronológico.
+12. Central de notificações.
+13. Histórico de acontecimentos.
+
+A navegação deverá ser clara e funcional.
+
+Priorizar usabilidade, organização das informações e facilidade de expansão.
+
+**Não desenvolver arte, ilustrações, retratos, animações ou sistemas gráficos elaborados nesta fase.**
+
+Utilizar apenas uma interface funcional, simples e organizada. Não gastar recursos de desenvolvimento com estética antes de consolidar a simulação.
+
+## 7. ARQUITETURA E TECNOLOGIA
+
+Antes de escolher tecnologias, inspecione o ambiente e os arquivos existentes.
+
+Escolha uma arquitetura que:
+- Seja simples de executar.
+- Exija poucas dependências.
+- Permita persistência local.
+- Seja modular.
+- Suporte expansão.
+- Não dependa de serviços pagos.
+- Não exija APIs externas para o funcionamento básico.
+
+Se possível, priorize uma experiência executável localmente no computador.
+
+Separar:
+- Motor de simulação.
+- Dados.
+- Regras de negócio.
+- Interface.
+- Persistência.
+- Conteúdo institucional e bibliográfico.
+
+Utilizar banco de dados apropriado para preservar partidas e relações entre entidades.
+
+Não misturar regras de simulação com componentes de interface.
+
+## 8. ESTRATÉGIA DE DESENVOLVIMENTO INCREMENTAL
+
+O projeto deverá ser desenvolvido em versões pequenas.
+
+### Fase 0 — Planejamento técnico
+
+Inspecionar o ambiente, definir tecnologias, elaborar arquitetura e estabelecer estrutura de arquivos.
+
+Documentar as decisões técnicas.
+
+### Fase 1 — Núcleo funcional
+
+Implementar:
+- Criação de personagens.
+- Criação de famílias.
+- Calendário.
+- Idade.
+- Progressão temporal.
+- Salvamento.
+- Carregamento.
+- Interface inicial.
+
+O resultado deverá ser uma primeira versão jogável.
+
+### Fase 2 — Vida social
+
+Implementar NPCs, relacionamentos, personalidade, memória e família.
+
+### Fase 3 — Educação
+
+Implementar escolas, universidades, cursos, vestibulares e formação acadêmica.
+
+### Fase 4 — Conhecimento
+
+Implementar livros, bibliotecas, leitura, disciplinas, aprendizagem e atributos cognitivos.
+
+### Fase 5 — Trabalho
+
+Implementar profissões, empresas, empregos, salários e progressão profissional.
+
+### Fase 6 — Economia
+
+Implementar bancos, despesas, investimentos, dívidas, patrimônio e mercado.
+
+### Fase 7 — Mundo
+
+Implementar cidades, migração, instituições e consumo.
+
+### Fase 8 — Política e acontecimentos
+
+Implementar organizações, eleições, eventos nacionais e transformações históricas.
+
+### Fase 9 — Integração
+
+Testar a interação entre todos os sistemas, corrigir inconsistências e aprimorar a simulação.
+
+Não é necessário concluir uma fase inteira antes de desenvolver pequenos componentes da seguinte, desde que o núcleo permaneça estável.
+
+## 9. PROTOCOLO OBRIGATÓRIO DE MICROATUALIZAÇÕES
+
+Cada atualização deverá seguir este procedimento:
+
+1. Inspecionar os arquivos relevantes.
+2. Identificar a funcionalidade solicitada.
+3. Identificar os módulos afetados.
+4. Implementar somente as alterações necessárias.
+5. Executar testes.
+6. Verificar se funcionalidades anteriores continuam funcionando.
+7. Atualizar a documentação.
+8. Registrar a alteração no changelog.
+
+Nunca substituir um sistema funcional por uma versão simplificada sem autorização.
+
+Nunca eliminar funcionalidades anteriores para facilitar uma implementação.
+
+Nunca afirmar que uma funcionalidade está pronta sem verificar seu funcionamento.
+
+Se uma atualização for muito grande, dividi-la em entregas menores.
+
+## 10. DOCUMENTAÇÃO E CONTINUIDADE
+
+Manter obrigatoriamente:
+
+- README.md — instruções de execução e visão geral.
+- ARCHITECTURE.md — arquitetura técnica.
+- PROJECT_STATE.md — estado atual do projeto e próximas tarefas.
+- CHANGELOG.md — histórico das atualizações.
+- ROADMAP.md — planejamento de desenvolvimento.
+- TESTS.md — testes e resultados relevantes.
+
+O PROJECT_STATE.md deverá ser especialmente conciso e atualizado ao final de cada sessão.
+
+Ele deverá informar:
+- O que já funciona.
+- O que foi implementado.
+- O que está incompleto.
+- Problemas conhecidos.
+- Próxima tarefa recomendada.
+- Como executar e testar o projeto.
+
+Isso permitirá retomar o desenvolvimento em novas conversas sem reconstruir todo o contexto.
+
+## 11. CRITÉRIOS DE QUALIDADE
+
+O projeto não será considerado funcional simplesmente porque possui menus e opções.
+
+Exemplos do comportamento esperado:
+
+- Ler um livro deverá modificar gradualmente os conhecimentos do personagem.
+- Estudar deverá consumir tempo e produzir resultados coerentes.
+- Conseguir um emprego deverá depender de requisitos e processos seletivos.
+- Receber um salário deverá atualizar o sistema financeiro.
+- Um relacionamento deverá mudar em consequência das interações.
+- Um NPC deverá continuar vivendo mesmo quando não estiver sendo observado.
+- Uma família deverá evoluir ao longo das gerações.
+- A passagem de tempo deverá atualizar o mundo inteiro.
+- Uma partida salva deverá preservar os dados após fechar e reabrir o jogo.
+
+Priorize testes de integração para verificar as interdependências.
+
+## 12. PRIMEIRA INSTRUÇÃO: COMECE AGORA
+
+Não tente desenvolver o jogo inteiro nesta primeira interação.
+
+Execute as seguintes tarefas:
+
+**A.** Inspecione o ambiente de desenvolvimento e os arquivos existentes.
+
+**B.** Escolha a tecnologia mais adequada, priorizando simplicidade, estabilidade e baixo custo de manutenção.
+
+**C.** Apresente uma arquitetura técnica objetiva, com estrutura de pastas e responsabilidades dos módulos.
+
+**D.** Identifique os riscos técnicos mais importantes.
+
+**E.** Crie a documentação inicial.
+
+**F.** Comece a implementação do núcleo funcional, seguindo a Fase 1.
+
+**G.** Entregue uma primeira versão efetivamente executável, ainda que simples.
+
+Não fique apenas planejando. Depois de definir a arquitetura, comece a escrever e testar o código.
+
+Se houver alguma limitação técnica, informe-a e proponha a alternativa mais simples.
+
+**REGRA FINAL: o objetivo não é produzir rapidamente um jogo superficial com dezenas de opções. É construir progressivamente um simulador de vida profundo, coerente, persistente e expansível. Cada sistema deverá funcionar de verdade e interagir com os demais.**

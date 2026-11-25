@@ -1,13 +1,18 @@
-# Simulador de Vida — Android
+# Simulador de Vida — Android (v0.20.0)
 
-Empacotamento Android do Simulador de Vida Brasileiro (v0.14.4). O código do jogo (`app/src/main/python/sim`, `main.py`, `app/src/main/assets/web`) é o original, sem alterações.
+Empacotamento Android do Simulador de Vida Brasileiro (**v0.20.0**, `versionCode 2000000`), com código Python em `simulador-vida-android/app/src/main/python/sim`, interface web em `simulador-vida-android/app/src/main/assets/web` e pacote consolidado para download único em `simulador_v0_20_0_android.zip`.
 
-Como funciona: Chaquopy embarca o Python 3.12; `android_launcher.py` sobe o servidor do jogo em `127.0.0.1:8765` e um WebView mostra a interface. Saves ficam em `filesDir/saves` e também são gravados ao sair do app.
+Como funciona: Chaquopy embarca o Python 3.12; `android_launcher.py` sobe o servidor do jogo em `127.0.0.1:8765` e um WebView exibe a interface. Saves ficam em `filesDir/saves` (esquema SQLite v19, compatível com saves v1–v18).
 
-## Baixar o APK
-Aba **Releases** → "Simulador de Vida (APK mais recente)" → `simulador-vida.apk`. No celular, permita "instalar apps desconhecidos" e abra o arquivo.
+## Pacote único para download e APK
+- **Código-fonte completo pronto para build (`v0.20.0`)**: arquivo único `simulador_v0_20_0_android.zip` na raiz do repositório (contém toda a pasta `simulador-vida-android/`).
+- **APK Android (`simulador-vida.apk`)**: compilado automaticamente pelo workflow `.github/workflows/build-apk.yml` (**Build APK**) a cada push na branch `main`, tag `v*` ou execução manual (*workflow_dispatch*) e publicado em **Releases → Simulador de Vida - APK mais recente** (e nos artefatos do workflow).
 
-## Build
-O GitHub Actions compila a cada push na `main` (workflow `Build APK`). Local: JDK 17, Android SDK, Python 3.12 e Gradle 8.7 → `gradle assembleDebug`.
+## Build local do APK
+Requer JDK 17, Android SDK 34 (`build-tools;34.0.0`), Python 3.12 e Gradle 8.7:
+```bash
+cd simulador-vida-android
+gradle assembleDebug
+```
+O APK gerado sai em `simulador-vida-android/app/build/outputs/apk/debug/app-debug.apk`.
 
-Para atualizar o jogo: substitua `sim/`, `main.py` e `assets/web/` e ajuste `versionCode`/`versionName` em `app/build.gradle.kts`.

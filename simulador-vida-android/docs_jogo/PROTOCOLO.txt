@@ -1,0 +1,122 @@
+# PROTOCOLO DE DESENVOLVIMENTO — ATUALIZAÇÕES MÍNIMAS E ENTREGAS CONCRETAS
+
+## REGRA ABSOLUTA
+
+Estou utilizando o Claude Free. Portanto, cada mensagem sua precisa produzir o máximo de progresso concreto possível, consumindo o mínimo de contexto e interações.
+
+**CADA RESPOSTA DEVE RESULTAR EM UMA ENTREGA REAL NO PROJETO.**
+
+Não quero conversas nas quais você apenas:
+- Apresenta planos.
+- Descreve funcionalidades futuras.
+- Sugere arquiteturas sem implementá-las.
+- Explica o que pretende fazer.
+- Lista tarefas que eu deveria executar.
+- Solicita autorização para continuar a cada pequena etapa.
+
+Quero que você trabalhe continuamente no código, respeitando o tamanho das atualizações.
+
+## 1. UMA MENSAGEM = UMA MICROATUALIZAÇÃO FUNCIONAL
+
+Em cada resposta:
+
+1. Identifique uma pequena funcionalidade ou melhoria.
+2. Inspecione somente os arquivos necessários.
+3. Implemente a funcionalidade diretamente no projeto.
+4. Execute os testes pertinentes.
+5. Corrija eventuais problemas encontrados.
+6. Atualize o PROJECT_STATE.md e o CHANGELOG.md.
+7. Apresente o resultado concreto.
+
+Não termine uma resposta apenas anunciando a próxima implementação.
+
+## 2. TAMANHO DAS ATUALIZAÇÕES
+
+Cada atualização deve ser pequena, isolada e suficientemente simples para ser concluída em uma única interação.
+
+Exemplos:
+
+- Criar o modelo de dados do personagem.
+- Implementar o cálculo de idade.
+- Implementar o avanço de um mês.
+- Adicionar a opção de avançar seis meses.
+- Implementar o avanço de um ano.
+- Criar o sistema de salvamento.
+- Implementar o carregamento de personagens.
+- Adicionar um atributo de personalidade.
+- Implementar uma relação de amizade.
+- Criar o primeiro registro de livro.
+- Implementar o primeiro mecanismo de leitura.
+
+Não tente implementar vários sistemas complexos simultaneamente.
+
+Se uma funcionalidade exigir muito código, divida-a em microatualizações menores.
+
+## 3. NÃO DESPERDICE MENSAGENS COM PLANEJAMENTO REPETIDO
+
+A arquitetura geral deve ser definida inicialmente e documentada.
+
+Depois disso, não volte a discutir decisões já estabelecidas, exceto quando houver um problema técnico real.
+
+Não apresente novamente o roadmap a cada resposta.
+
+Não peça autorização para executar tarefas que já foram autorizadas por este prompt.
+
+Se uma decisão técnica secundária estiver em aberto, escolha a alternativa mais simples e consistente e prossiga.
+
+Faça perguntas somente quando uma informação indispensável estiver faltando.
+
+## 4. PRESERVAÇÃO DO PROJETO
+
+Nunca reescreva o projeto inteiro para adicionar uma funcionalidade.
+
+Nunca substitua vários arquivos sem necessidade.
+
+Nunca elimine funcionalidades existentes.
+
+Prefira alterações pontuais e compatíveis com a arquitetura atual.
+
+Antes de alterar um módulo, verifique suas dependências.
+
+## 5. ENTREGA OBRIGATÓRIA
+
+Ao final de cada resposta, apresente exclusivamente um relatório curto contendo:
+
+**ATUALIZAÇÃO:** o que foi implementado.
+
+**ARQUIVOS:** quais arquivos foram criados ou modificados.
+
+**TESTES:** quais testes foram executados e seus resultados.
+
+**ESTADO:** se o projeto continua executável.
+
+**PRÓXIMA MICROATUALIZAÇÃO:** qual será a próxima implementação lógica.
+
+Não afirme que algo funciona sem ter executado a verificação correspondente.
+
+## 6. CONTINUIDADE ENTRE CONVERSAS
+
+O arquivo PROJECT_STATE.md é a principal referência para retomar o desenvolvimento.
+
+Atualize-o após cada entrega, mantendo:
+- Funcionalidades implementadas.
+- Funcionalidades pendentes.
+- Estrutura atual.
+- Problemas conhecidos.
+- Próxima microatualização.
+
+Quando iniciar uma nova conversa, leia primeiro esse arquivo e continue de onde o desenvolvimento parou.
+
+Não recomece o projeto.
+
+## 7. INSTRUÇÃO DE EXECUÇÃO
+
+Comece imediatamente.
+
+Não responda com um planejamento extenso.
+
+Faça somente o planejamento técnico indispensável, crie a estrutura inicial e implemente a primeira funcionalidade executável na mesma resposta, sempre que o ambiente permitir.
+
+Se já existir um projeto, continue a partir dele.
+
+**OBJETIVO: transformar cada interação em progresso acumulado no código. Não quero dez mensagens de planejamento. Quero dez pequenas entregas funcionais.**

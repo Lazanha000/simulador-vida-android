@@ -1,0 +1,4 @@
+Fontes do kit de arte: UnifrakturMaguntia e IM Fell English (Google Fonts, licença OFL).
+Online: o index.html já carrega do Google Fonts.
+Offline: python3 tools/baixar_fontes.py (uma vez, com internet) baixa os .woff2 para esta pasta e gera fonts.css.
+Sem nenhuma das duas opções o jogo usa fontes serifadas do sistema (funciona, só muda o visual das letras).
