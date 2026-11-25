@@ -1,5 +1,4 @@
 
-
 name: Build APK
 
 on:
@@ -14,73 +13,129 @@ permissions:
   contents: write
 
 jobs:
-  apk:
+  build-apk:
+    name: Build Android APK
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
+      # 1. Baixar o repositório
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      # 2. Configurar Java
+      - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
+      # 3. Configurar Android SDK sem aceitação interativa
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          accept-android-sdk-licenses: false
+          log-accepted-android-sdk-licenses: false
+          packages: ""
 
+      # 4. Aceitar licenças explicitamente
+      - name: Accept Android SDK licenses
+        shell: bash
+        run: |
+          set -euo pipefail
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager --licenses
+
+      # 5. Instalar componentes necessários
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0"
+
+      # 6. Configurar Gradle
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.7"
 
-      - name: Extract Android project
+      # 7. Localizar ou extrair o projeto Android
+      - name: Locate Android project
+        shell: bash
         run: |
-          ZIP_FILE="$(find . -maxdepth 1 -type f -iname '*.zip' -print -quit)"
+          set -euo pipefail
 
-          if [ -z "$ZIP_FILE" ]; then
-            echo "ERRO: Nenhum arquivo ZIP encontrado na raiz."
-            exit 1
+          if [ -f "$GITHUB_WORKSPACE/settings.gradle.kts" ]; then
+            PROJECT_DIR="$GITHUB_WORKSPACE"
+
+          elif [ -f "$GITHUB_WORKSPACE/simulador-vida-android/settings.gradle.kts" ]; then
+            PROJECT_DIR="$GITHUB_WORKSPACE/simulador-vida-android"
+
+          else
+            ZIP_FILE="$(find "$GITHUB_WORKSPACE" \
+              -maxdepth 2 -type f -iname '*.zip' -print -quit)"
+
+            if [ -z "$ZIP_FILE" ]; then
+              echo "ERRO: Nenhum projeto Android ou ZIP encontrado."
+              exit 1
+            fi
+
+            mkdir -p "$GITHUB_WORKSPACE/android-source"
+            unzip -q "$ZIP_FILE" -d "$GITHUB_WORKSPACE/android-source"
+
+            SETTINGS_FILE="$(find "$GITHUB_WORKSPACE/android-source" \
+              -maxdepth 5 -type f -name 'settings.gradle.kts' -print -quit)"
+
+            if [ -z "$SETTINGS_FILE" ]; then
+              echo "ERRO: settings.gradle.kts não encontrado no ZIP."
+              exit 1
+            fi
+
+            PROJECT_DIR="$(dirname "$SETTINGS_FILE")"
           fi
 
-          echo "Extraindo: $ZIP_FILE"
-          mkdir -p source
-          unzip -q "$ZIP_FILE" -d source
-
-          PROJECT_DIR="source/simulador-vida-android"
-
-          if [ ! -f "$PROJECT_DIR/settings.gradle.kts" ]; then
-            echo "ERRO: Projeto Android não encontrado."
-            find source -maxdepth 3 -type f
-            exit 1
-          fi
-
+          echo "Projeto encontrado: $PROJECT_DIR"
           echo "ANDROID_PROJECT=$PROJECT_DIR" >> "$GITHUB_ENV"
 
-      - name: Build Debug APK
-        working-directory: source/simulador-vida-android
-        run: gradle --no-daemon --stacktrace assembleDebug
-
-      - name: Prepare APK
+      # 8. Verificar estrutura do projeto
+      - name: Validate Android project
+        shell: bash
         run: |
-          mkdir -p output
+          set -euo pipefail
 
-          cp source/simulador-vida-android/app/build/outputs/apk/debug/app-debug.apk \
-            output/simulador-vida.apk
+          test -f "$ANDROID_PROJECT/settings.gradle.kts"
+          test -f "$ANDROID_PROJECT/build.gradle.kts"
+          test -f "$ANDROID_PROJECT/app/build.gradle.kts"
+          test -f "$ANDROID_PROJECT/app/src/main/AndroidManifest.xml"
 
-          if [ ! -s output/simulador-vida.apk ]; then
-            echo "ERRO: APK não foi gerado corretamente."
+          echo "Estrutura Android validada."
+
+      # 9. Compilar APK
+      - name: Build Debug APK
+        working-directory: ${{ env.ANDROID_PROJECT }}
+        run: |
+          gradle --no-daemon --stacktrace assembleDebug
+
+      # 10. Preparar APK
+      - name: Prepare APK
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          APK="$ANDROID_PROJECT/app/build/outputs/apk/debug/app-debug.apk"
+
+          if [ ! -s "$APK" ]; then
+            echo "ERRO: APK não foi gerado."
             exit 1
           fi
 
-          ls -lh output/simulador-vida.apk
+          mkdir -p "$GITHUB_WORKSPACE/output"
+          cp "$APK" "$GITHUB_WORKSPACE/output/simulador-vida.apk"
 
+          ls -lh "$GITHUB_WORKSPACE/output/simulador-vida.apk"
+
+      # 11. Disponibilizar APK para download
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -89,6 +144,7 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      # 12. Publicar versão mais recente
       - name: Publish Latest Release
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
@@ -98,11 +154,14 @@ jobs:
           files: output/simulador-vida.apk
           make_latest: true
           overwrite_files: true
+          fail_on_unmatched_files: true
 
+      # 13. Publicar versões identificadas por tags
       - name: Publish Version Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: output/simulador-vida.apk
-        
           overwrite_files: true
+          fail_on_unmatched_files: true
+          
