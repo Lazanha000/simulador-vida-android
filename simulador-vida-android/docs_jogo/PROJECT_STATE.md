@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-Versão: 0.20.0 | Atualizado: 2026-11-25 | Fase atual: Grande atualização v0.20.0 concluída (psicologia, vínculos multidimensionais, enciclopédia/idiomas/205 livros, cursos técnicos, estágio/freela/expansão, equipamentos/plano de saúde/extrato, save v19)
+Versão: 0.21.0 | Atualizado: 2026-11-25 | Fase atual: Atualização v0.21.0 concluída (acessibilidade, botão voltar para última tela, lista de leitura, estudo/freela em lote, hora extra, modo escuro, 34 cursos reais do Brasil, save v20)
 
 ## Como executar e testar
 - Jogar (Web local): `PYTHONPATH=app/src/main/python python3 app/src/main/python/main.py` (Python 3.10+, só biblioteca padrão; saves em `saves/*.db`)
@@ -29,7 +29,7 @@ Versão: 0.20.0 | Atualizado: 2026-11-25 | Fase atual: Grande atualização v0.2
 - Círculo social: amizades mensais por afinidade de personalidade e extroversão (máx. 8 amigos vivos, faixa de idade, sem parentes); luto de amigo; o casamento escolhe o parceiro no círculo (amigos e amigos de amigos), com 40% de chance de conhecer alguém de fora se o círculo não tiver parceiro compatível. Interruptor `engine.CIRCULO_SOCIAL`.
 - Educação básica: matrícula aos 6 anos (fevereiro), ano letivo (dezembro) com desempenho por cognição ajustada à idade, conscienciosidade e saúde; aprovação/reprovação, abandono, conclusão do fundamental (9 anos) e do médio (12); colegas de turma ganham peso nas amizades. Medido: ≈92% concluem o fundamental, ≈72% o médio, ≈6% de reprovação. Interruptor `engine.EDUCACAO`.
 - Ensino superior (4 anos): ingresso em fevereiro por idade e aptidão, aprovação/reprovação/abandono anual, formatura; retorno aos estudos de adultos (18–45 anos) que pararam antes de concluir o médio. Medido: ≈34% ingressam e ≈24% se formam (coorte até ~30 anos); ≈3% retornam. Interruptor `engine.ENSINO_SUPERIOR`.
-- Trabalho (v0.6.0, `sim/work.py` + `engine._work`): ≥16 anos fora da escola entram no mercado ("procura trabalho"); contratação mensal por aptidão (cognição + conscienciosidade), idade e saúde; ocupação sorteada entre 19 ocupações genéricas que exigem escolaridade e aptidão mínimas (formação importa, não garante: ≈42–48% dos graduados em vaga de nível superior); perda de emprego (menor com conscienciosidade alta e vínculo longo); troca para ocupação melhor após formação maior; aposentadoria a partir de 60 anos (todos aos 75). Medido: ≈83–94% empregados e 6–17% de desemprego aos 25–54 anos. Interruptor `engine.TRABALHO`.
+- Trabalho (v0.6.0, `sim/work.py` + `engine._work`): ≥16 anos fora da escola entram no mercado ("procura trabalho"); contratação mensal por aptidão (cognição + conscienciosidade), idade e saúde; ocupação sorteada entre ocupações genéricas e especializadas (36 ocupações em v0.21.0) que exigem escolaridade e aptidão mínimas (formação importa, não garante); perda de emprego (menor com conscienciosidade alta e vínculo longo); troca para ocupação melhor após formação maior; aposentadoria a partir de 60 anos (todos aos 75). Medido: ≈83–94% empregados e 6–17% de desemprego aos 25–54 anos. Interruptor `engine.TRABALHO`.
 - Situação de trabalho inicial de adultos criados/carregados sem RNG (`work.default_work`). Ficha da CLI mostra "Trabalho".
 - Economia e carreira (v0.7.0, `sim/economy.py` + `work.py` + `engine.economy.apply_month`): salário por ocupação × nível (júnior/pleno/sênior/chefia) × experiência × formal/informal (informal −20%, 1,5× mais demissões); promoção só para formais (≥24 meses no nível, ×aptidão); renda mensal e patrimônio por personagem; domicílio (casal + dependentes) com custo de vida, poupança por conscienciosidade, rendimento, dívida limitada e auxílio social por baixa renda per capita; aposentadoria com benefício (formal 70% do último salário; informal 1 mínimo); herança na morte (cônjuge/filhos); colegas de trabalho (mesmo local) pesam ×3 nas amizades. Medido: renda média dos empregados ≈2,2 mínimos, Gini ≈0,35, endividados 4–11%. Valores ilustrativos, em reais constantes. Interruptor `engine.ECONOMIA`.
 - CLI: opção 12 (Finanças do domicílio) e 13 (Panorama econômico); ficha mostra renda, patrimônio, nível e vínculo.
@@ -63,12 +63,19 @@ Versão: 0.20.0 | Atualizado: 2026-11-25 | Fase atual: Grande atualização v0.2
 - **Mundo e utilidades (`sim/mundo.py`)**: 4 equipamentos pessoais (`notebook`, `biblioteca`, `kit_esportivo`, `instrumento`) com bônus reais, plano de saúde particular mensal, registro e extrato de movimentações financeiras e notícia real do Censo Demográfico decenal (2030+).
 - **Decisões, UI e persistência (`sim/decisions.py` + `sim/persistence.py` + `sim/ui_web.py` + `sim/panels.py` + `web/js/panels.js`)**: +12 eventos de 3 opções; 19 novas rotas HTTP e novas abas/telas na interface web; **Save v19** preservando todos os estados novos com migração retrocompatível a partir de v1–v18.
 
+## v0.21.0 — acessibilidade, lista de leitura, modo escuro e 34 cursos reais
+- **Navegação em 1 clique e acessibilidade (`web/js/ui.js`, `panels.js`, `app.js`, `css/app.css`)**: seta `←` no canto superior esquerdo de painéis e diálogos, chip persistente `↩ <Última tela>` na barra de data (e `Alt+←`) para retornar instantaneamente à tela anterior (ENEM/Faculdade, Empresas, Biblioteca, Estudar, etc.), atualização no próprio lugar sem fechar modais após agir, alvos ≥44×44 px e contornos `:focus-visible`.
+- **Dock rápido e lote (`sim/intelecto.py`, `sim/carreiras.py`, `sim/ui_web.py`)**: 5 atalhos na barra rápida (`Ações`, `Estudar`, `Livros`, `Foco`, `Menu`), `Estudar N×`, `Fazer N× freelas` e `Hora extra` (até 2/mês), além de links diretos entre `Estudar` ↔ `ENEM & Faculdade` e `Trabalho` → `Empresas do mercado`.
+- **Lista de leitura ordenada (`sim/livros.py`)**: `fila_leitura` ordenada, botões `+ Lista` / `✓ Na lista`, reordenação `↑`/`↓`, **`Ler lista agora`** em 1 clique e opção `auto_ler_fila` ao avançar o mês (Save **v20**).
+- **Modo escuro (`ui.js`, `panels.js`, `css/app.css`)**: alternância via `#btn-tema` ou **Menu → Ajustes**, persistida em `localStorage` (`simTema`).
+- **34 cursos reais do Brasil (`sim/educacao_br.py`, `sim/work.py`, `sim/economy.py`, `sim/firms.py`)**: Ciências Sociais, Filosofia, Matemática, Letras + 20 novos cursos reais integrados a `+17` ocupações e setores empresariais, com filtro por área, busca e cálculo ao vivo da nota de corte.
+
 ## Estrutura
-- Motor e regras: `sim/models.py`, `sim/factory.py`, `sim/engine.py`, `sim/persistence.py` (SQLite, schema v19).
+- Motor e regras: `sim/models.py`, `sim/factory.py`, `sim/engine.py`, `sim/persistence.py` (SQLite, schema v20).
 - Trabalho e macroeconomia: `sim/work.py`, `sim/firms.py`, `sim/cycle.py`, `sim/economy.py`, `sim/macro.py`.
 - Vida pessoal, educação e intelecto: `sim/romance.py`, `sim/conhecidos.py`, `sim/convivio.py`, `sim/encontros.py`, `sim/vinculos.py`, `sim/psicologia.py`, `sim/educacao_br.py`, `sim/intelecto.py`, `sim/livros.py`.
 - Sociedade, carreira e decisões: `sim/decisions.py`, `sim/foco.py`, `sim/carreiras.py`, `sim/mundo.py`, `sim/achievements.py`, `sim/herdeiros.py`, `sim/saude.py`, `sim/moradia.py`, `sim/familia.py`, `sim/tempo.py`.
-- Interfaces e WebView Android: `sim/ui_web.py`, `sim/panels.py`, `sim/ui_cli.py`, `app/src/main/assets/web/` (`index.html`, `js/app.js`, `js/ui.js`, `js/panels.js`, `css/style.css`), `app/src/main/java/com/lazanha/simulador/MainActivity.kt`.
+- Interfaces e WebView Android: `sim/ui_web.py`, `sim/panels.py`, `sim/ui_cli.py`, `app/src/main/assets/web/` (`index.html`, `js/app.js`, `js/ui.js`, `js/panels.js`, `css/app.css`), `app/src/main/java/com/lazanha/simulador/MainActivity.kt`.
 - Documentação e testes: `docs_jogo/` (`ARCHITECTURE.md`, `CHANGELOG.md`, `ROADMAP.md`, `TESTS.md`, `tests/`). Detalhes em `ARCHITECTURE.md`.
 
 ## Incompleto / limitações atuais
@@ -76,7 +83,7 @@ Versão: 0.20.0 | Atualizado: 2026-11-25 | Fase atual: Grande atualização v0.2
 - Orçamento do Estado sem retroalimentação macroeconômica dinâmica (déficit fiscal não reajusta juros/impostos automaticamente; inflação modelada de forma exógena ao emprego); sem câmbio externo.
 - Personalidade base (Big Five) permanece estável após a vida adulta (oscilações de bem-estar ocorrem via eixos de `psicologia`).
 - CLI (`sim/ui_cli.py`) continua sem todas as sub-telas interativas da interface web/Android (`ui_web.py` + `panels.py`), sendo a WebUI a experiência principal.
-- Compilação do APK: o projeto Android (`build.gradle.kts`, `settings.gradle.kts`) está configurado na v0.20.0 (`versionCode = 2000000`), porém não pôde ser compilado nem testado em dispositivo neste ambiente (ausência de JDK, Android SDK e Gradle no contêiner); compilação automatizada via `.github/workflows/build-apk.yml`.
+- Compilação do APK: o projeto Android (`build.gradle.kts`, `settings.gradle.kts`) está configurado na v0.21.0 (`versionCode = 2100000`), porém não pôde ser compilado nem testado em dispositivo neste ambiente (ausência de JDK, Android SDK e Gradle no contêiner); compilação automatizada via `.github/workflows/build-apk.yml`.
 
 ## Problemas conhecidos (resumo técnico)
 1. As taxas de mortalidade e faixas salariais continuam ilustrativas e calibradas para jogabilidade em reais constantes.

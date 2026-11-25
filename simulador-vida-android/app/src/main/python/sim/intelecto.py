@@ -188,6 +188,8 @@ def dados(game: Game, cid: int) -> dict:
     st.setdefault("bonus_escola", [0, 0])
     st.setdefault("bonus_enem", [0, 0])
     st.setdefault("bonus_concurso", [0, 0])
+    st.setdefault("fila_leitura", [])
+    st.setdefault("auto_ler_fila", False)
     return st
 
 
@@ -310,6 +312,37 @@ def estudar(game: Game, modo_id: str = "escola", area_id: str | None = None) -> 
         "rotulo": rotulo,
         "ganhos": ganhos,
         "restantes": LIMITE_ESTUDO_MES - sm[1],
+        "mensagem": msg,
+    }
+
+
+def estudar_lote(game: Game, modo_id: str = "escola", area_id: str | None = None, sessoes: int | None = None) -> dict:
+    """Executa várias sessões de estudo em 1 ação (padrão: todas as restantes do mês) sem consumir `game.rng`."""
+    p = _jogador(game)
+    if p is None:
+        raise ValueError("Nenhum personagem vivo do jogador.")
+    st = dados(game, p.id)
+    sm = _sessoes_mes(st, _mes(game))
+    disponiveis = LIMITE_ESTUDO_MES - sm[1]
+    if disponiveis <= 0:
+        raise ValueError(f"Você já fez {LIMITE_ESTUDO_MES} sessões de estudo neste mês. Avance o mês para continuar.")
+    alvo = disponiveis if sessoes is None else max(1, min(disponiveis, int(sessoes)))
+    ganhos_totais = []
+    ultimo = None
+    for _ in range(alvo):
+        res = estudar(game, modo_id, area_id)
+        ultimo = res
+        for g in res.get("ganhos", []):
+            if g not in ganhos_totais:
+                ganhos_totais.append(g)
+    rotulo = ultimo["rotulo"] if ultimo else MODOS_POR_ID.get(modo_id, (modo_id, modo_id))[1]
+    msg = f"Concluiu {alvo} sessão(ões) de {rotulo}."
+    return {
+        "modo": modo_id,
+        "rotulo": rotulo,
+        "sessoes": alvo,
+        "ganhos": ganhos_totais,
+        "restantes": LIMITE_ESTUDO_MES - _sessoes_mes(st, _mes(game))[1],
         "mensagem": msg,
     }
 
@@ -608,6 +641,13 @@ def apply_month(game: Game) -> None:
             if pts > 0:
                 atual = float(ret.get(aid, 100.0))
                 ret[aid] = round(max(35.0, atual - queda), 1)
+    # Leitura automática opcional da lista de leitura ao virar o mês (só quando o jogador ativou)
+    p = _jogador(game)
+    if p is not None:
+        st_p = game.intelecto.get(p.id)
+        if st_p and st_p.get("auto_ler_fila") and st_p.get("fila_leitura"):
+            from . import livros
+            livros.ler_fila(game, silencioso=True)
 
 
 def view(game: Game) -> dict:

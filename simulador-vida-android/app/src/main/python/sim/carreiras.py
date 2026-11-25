@@ -312,6 +312,55 @@ def fazer_freela(game: Game, area_id: str = "economia") -> dict:
     return {"area": area_nome, "valor": valor, "restantes": 2 - fl[1]}
 
 
+def fazer_freelas_lote(game: Game, area_id: str = "economia") -> dict:
+    """Executa todos os projetos freelancer restantes do mês em 1 clique."""
+    p = _jogador(game)
+    if p is None:
+        raise ValueError("Nenhum personagem vivo do jogador.")
+    ex = game.carreira_extra.setdefault(p.id, {})
+    mes = _mes(game)
+    fl = ex.get("freelas_mes")
+    feitos = fl[1] if isinstance(fl, list) and len(fl) == 2 and fl[0] == mes else 0
+    disp = max(0, 2 - feitos)
+    if disp <= 0:
+        raise ValueError("Você já concluiu os 2 projetos autônomos deste mês.")
+    total = 0.0
+    area_nome = area_id
+    for _ in range(disp):
+        r = fazer_freela(game, area_id)
+        total = round(total + r["valor"], 2)
+        area_nome = r["area"]
+    return {"area": area_nome, "quantidade": disp, "valor": total, "restantes": 0}
+
+
+def trabalho_extra(game: Game) -> dict:
+    """Realiza hora extra / turno adicional no trabalho (ou estágio) até 2 vezes/mês."""
+    p = _jogador(game)
+    if p is None:
+        raise ValueError("Nenhum personagem vivo do jogador.")
+    if p.age_at(game.year, game.month) < work.IDADE_TRABALHO_MIN:
+        raise ValueError(f"Trabalho disponível a partir dos {work.IDADE_TRABALHO_MIN} anos.")
+    ex = game.carreira_extra.setdefault(p.id, {})
+    if not work.is_employed(p) and not ex.get("meio_periodo") and not ex.get("estavel"):
+        raise ValueError("É preciso estar trabalhando ou em estágio para fazer hora extra.")
+    mes = _mes(game)
+    xm = ex.get("extras_mes")
+    if not isinstance(xm, list) or len(xm) != 2 or xm[0] != mes:
+        xm = [mes, 0]
+        ex["extras_mes"] = xm
+    if xm[1] >= 2:
+        raise ValueError("Você já realizou 2 turnos extras neste mês.")
+    base_renda = p.income if p.income > 0 else macro.min_wage(game)
+    bonus = round(max(0.18 * macro.min_wage(game), 0.12 * base_renda), 2)
+    p.wealth = round(p.wealth + bonus, 2)
+    p.experience += 1
+    p.health = max(0.0, round(p.health - 0.3, 2))
+    xm[1] += 1
+    mundo.registrar_transacao(game, p.id, "entrada", bonus, "Hora extra / turno adicional")
+    game.add_event(p.id, "trabalho", f"Realizou hora extra no trabalho e recebeu R$ {bonus:,.2f}.".replace(",", "X").replace(".", ",").replace("X", "."))
+    return {"valor": bonus, "restantes": 2 - xm[1]}
+
+
 def participar_movimento(game: Game, mov_id: str) -> dict:
     p = _jogador(game)
     if p is None:

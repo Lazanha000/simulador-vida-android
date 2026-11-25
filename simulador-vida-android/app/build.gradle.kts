@@ -12,8 +12,8 @@ android {
         applicationId = "com.lazanha.simulador"
         minSdk = 24
         targetSdk = 34
-        versionCode = 2000000
-        versionName = "0.20.0"
+        versionCode = 2100000
+        versionName = "0.21.0"
         ndk { abiFilters += listOf("arm64-v8a") }
     }
 

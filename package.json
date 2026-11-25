@@ -1,0 +1,13 @@
+{
+  "name": "simulador-vida-android",
+  "version": "0.21.0",
+  "private": true,
+  "description": "Simulador de Vida Brasileiro (v0.21.0) — Web preview & Android packaging",
+  "scripts": {
+    "dev": "PYTHONPATH=simulador-vida-android/app/src/main/python python3 simulador-vida-android/app/src/main/python/main.py --host 0.0.0.0 --port ${PORT:-3000} --no-browser --saves-dir /tmp/simulador-saves",
+    "start": "PYTHONPATH=simulador-vida-android/app/src/main/python python3 simulador-vida-android/app/src/main/python/main.py --host 0.0.0.0 --port ${PORT:-3000} --no-browser --saves-dir /tmp/simulador-saves",
+    "build": "node --check simulador-vida-android/app/src/main/assets/web/js/app.js && node --check simulador-vida-android/app/src/main/assets/web/js/panels.js && node --check simulador-vida-android/app/src/main/assets/web/js/ui.js",
+    "lint": "node --check simulador-vida-android/app/src/main/assets/web/js/app.js && node --check simulador-vida-android/app/src/main/assets/web/js/panels.js && node --check simulador-vida-android/app/src/main/assets/web/js/ui.js",
+    "test": "PYTHONPATH=simulador-vida-android/app/src/main/python:simulador-vida-android/docs_jogo python3 -m unittest discover -s simulador-vida-android/docs_jogo/tests -t simulador-vida-android/docs_jogo"
+  }
+}

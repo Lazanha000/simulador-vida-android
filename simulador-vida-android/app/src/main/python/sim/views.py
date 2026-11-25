@@ -259,6 +259,8 @@ def estado(game: Game | None, meta: dict | None = None) -> dict:
         emp_obj = game.firms.get(emp_id) if emp_id is not None else None
         fl = ex.get("freelas_mes")
         freelas_feitos = fl[1] if isinstance(fl, list) and len(fl) == 2 and fl[0] == (game.year * 12 + game.month) else 0
+        xm = ex.get("extras_mes")
+        extras_feitos = xm[1] if isinstance(xm, list) and len(xm) == 2 and xm[0] == (game.year * 12 + game.month) else 0
         prox_porte = carreiras.PORTE_PROXIMO.get(emp_obj.size) if (emp_obj and emp_obj.is_open) else None
         out["educacao_br"] = {
             "enem_ano": ed.get("enem_ano"),
@@ -274,7 +276,7 @@ def estado(game: Game | None, meta: dict | None = None) -> dict:
             "tecnicos_concluidos": list(ed.get("tecnicos_concluidos", [])),
             "custo_mudanca": mundo.custo_mudanca(game, p),
             "universidades": [{"sigla": u[0], "nome": u[1], "cidade_id": u[2], "cidade_nome": mundo.CIDADES_POR_ID.get(u[2], (u[2], u[2]))[1], "uf": u[3], "tipo": u[4], "corte": u[5]} for u in educacao_br.UNIVERSIDADES],
-            "cursos": [{"id": cr[0], "nome": cr[1], "anos": cr[2], "ajuste": cr[3], "tipo": educacao_br.CURSO_TIPO.get(cr[0], "Bacharelado"), "mensalidade": round(cr[5] * mw, 2)} for cr in educacao_br.CURSOS],
+            "cursos": [{"id": cr[0], "nome": cr[1], "anos": cr[2], "ajuste": cr[3], "tipo": educacao_br.CURSO_TIPO.get(cr[0], "Bacharelado"), "area": educacao_br.CURSO_AREA.get(cr[0], "Geral"), "mensalidade": round(cr[5] * mw, 2)} for cr in educacao_br.CURSOS],
             "cursos_tecnicos": [{"id": t[0], "nome": t[1], "meses": t[2], "mensalidade": round(t[4] * mw, 2)} for t in educacao_br.CURSOS_TECNICOS],
             "pos_opcoes": [{"id": k, "nome": v[0], "meses": v[1], "bolsa": round(v[2] * mw, 2), "bonus": int(round((v[3] - 1) * 100))} for k, v in educacao_br.POS_NIVEIS.items()],
         }
@@ -283,6 +285,7 @@ def estado(game: Game | None, meta: dict | None = None) -> dict:
             "cargo_publico": ex.get("cargo_publico"),
             "meio_periodo": ex.get("meio_periodo"),
             "freelas_restantes": max(0, 2 - freelas_feitos),
+            "extras_restantes": max(0, 2 - extras_feitos),
             "empresa": {
                 "id": emp_obj.id, "nome": emp_obj.name, "setor": emp_obj.sector, "porte": emp_obj.size,
                 "pode_expandir": prox_porte is not None,

@@ -366,7 +366,10 @@ def p_trabalho(game: Game, c: Character, q: dict, meta: dict) -> dict:
     if extra_rows:
         blocos.insert(1, L("Concursos, estágio, empresa e política", extra_rows))
     if c.id == game.player_id and c.alive:
-        blocos.append(ACOES([{"rotulo": "Concursos, freelas, empresa e política", "acao": "abrir_modal", "modal": "carreiras"}]))
+        blocos.append(ACOES([
+            {"rotulo": "Concursos, freelas, empresa e política", "acao": "abrir_modal", "modal": "carreiras"},
+            {"rotulo": "Empresas do mercado", "acao": "painel", "nome": "empresas"},
+        ]))
     return _painel("Trabalho", _ic("trabalho"), blocos)
 
 
@@ -639,6 +642,7 @@ def p_config(game: Game, c: Character | None, q: dict, meta: dict) -> dict:
     auto = bool(meta.get("autosave", True))
     acoes = [
         {"rotulo": f"Autosave: {'ligado' if auto else 'desligado'}", "acao": "autosave", "valor": not auto},
+        {"rotulo": "Alternar modo escuro / claro", "acao": "tema"},
         {"rotulo": "Lembrar onde eu estava", "acao": "lembrar"},
         {"rotulo": "Salvar agora", "acao": "salvar"},
         {"rotulo": "Personagens", "acao": "painel", "nome": "personagens"},

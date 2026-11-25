@@ -1,8 +1,8 @@
-# Simulador de Vida — Android (v0.20.0)
+# Simulador de Vida — Android (v0.21.0)
 
-Empacotamento Android do Simulador de Vida Brasileiro (**v0.20.0**). O código do jogo está em `app/src/main/python/sim`, `app/src/main/python/main.py` e `app/src/main/assets/web`.
+Empacotamento Android do Simulador de Vida Brasileiro (**v0.21.0**). O código do jogo está em `app/src/main/python/sim`, `app/src/main/python/main.py` e `app/src/main/assets/web`.
 
-Como funciona: Chaquopy embarca o Python 3.12; `android_launcher.py` sobe o servidor do jogo em `127.0.0.1:8765` e um WebView exibe a interface. Saves ficam em `filesDir/saves` (esquema SQLite v19, retrocompatível com saves v1–v18).
+Como funciona: Chaquopy embarca o Python 3.12; `android_launcher.py` sobe o servidor do jogo em `127.0.0.1:8765` e um WebView exibe a interface. Saves ficam em `filesDir/saves` (esquema SQLite v20, retrocompatível com saves v1–v19).
 
 ## Executar e testar no PC
 - Interface web local: `PYTHONPATH=app/src/main/python python3 app/src/main/python/main.py`

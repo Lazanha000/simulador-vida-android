@@ -2,9 +2,7 @@
 export const $ = (s, r = document) => r.querySelector(s);
 export const A = (p) => `arte/${p}`;   // caminho de um arquivo do kit de arte
 
-// --- memória de "onde eu estava" (v0.19.0) ---
-// Guarda buscas, filtros, abas, seleções e posição de rolagem de cada tela, por partida (escopo), em localStorage.
-// Tudo em try/catch: sem armazenamento o jogo funciona igual, só não lembra. Ligada/desligada em Ajustes.
+// --- memória de "onde eu estava" (v0.19.0+) ---
 const MEM_CHAVE = 'simMemoria', MEM_LIGADA = 'simMemoriaLigada', MEM_MAX = 500;
 let _mem = {}, _escopo = 'g', _on = true, _tim = null;
 const _salvadores = new Set();
@@ -20,18 +18,16 @@ export const memoria = {
     if (!_on) return;
     _mem[`${_escopo}|${k}`] = v;
     const ks = Object.keys(_mem);
-    if (ks.length > MEM_MAX) for (const x of ks.slice(0, ks.length - MEM_MAX)) delete _mem[x];   // descarta as mais antigas
+    if (ks.length > MEM_MAX) for (const x of ks.slice(0, ks.length - MEM_MAX)) delete _mem[x];
     if (!_tim) _tim = setTimeout(_grava, 300);
   },
   limparTela(prefixo) { for (const c of Object.keys(_mem)) if (c.startsWith(`${_escopo}|${prefixo}`)) delete _mem[c]; if (!_tim) _tim = setTimeout(_grava, 300); },
-  // Telas abertas registram um "salvador" (grava rolagem etc.); roda ao sair do app/aba para não perder a posição.
   registrar(fn) { _salvadores.add(fn); return () => _salvadores.delete(fn); },
 };
 const _aoSair = () => { if (document.visibilityState === 'hidden') { for (const f of _salvadores) { try { f(); } catch { /* ignora */ } } if (_tim) _grava(); } };
 document.addEventListener('visibilitychange', _aoSair);
 window.addEventListener('pagehide', () => { for (const f of _salvadores) { try { f(); } catch { /* ignora */ } } if (_tim) _grava(); });
 
-// Faz um campo (select, input, checkbox) lembrar o valor; só aplica o valor salvo se ele ainda for válido.
 export function lembrar(chave, el) {
   const salvo = memoria.ler(chave);
   if (salvo !== undefined) {
@@ -59,6 +55,35 @@ export function h(tag, props, ...kids) {
   return e;
 }
 
+// Ícones vetoriais inline (nítidos em claro e escuro; sem arquivos extras em arte/).
+const SVG_NS = 'http://www.w3.org/2000/svg';
+export function iconeSvg(paths, size = 18) {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('width', String(size));
+  svg.setAttribute('height', String(size));
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2.1');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  for (const d of (Array.isArray(paths) ? paths : [paths])) {
+    const p = document.createElementNS(SVG_NS, 'path');
+    p.setAttribute('d', d);
+    svg.append(p);
+  }
+  return svg;
+}
+
+export const SVG_SETA_ESQ = ['M15 18l-6-6 6-6', 'M9 12h10'];
+export const SVG_VOLTAR_HIST = ['M9 14L4 9l5-5', 'M4 9h10.5a5.5 5.5 0 0 1 0 11H11'];
+export const SVG_LUA = ['M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z'];
+export const SVG_SOL = ['M12 2v2', 'M12 20v2', 'M4.93 4.93l1.41 1.41', 'M17.66 17.66l1.41 1.41', 'M2 12h2', 'M20 12h2', 'M4.93 19.07l1.41-1.41', 'M17.66 6.34l1.41-1.41', 'M12 7a5 5 0 1 0 0 10a5 5 0 0 0 0-10z'];
+export const SVG_FECHAR = ['M18 6L6 18', 'M6 6l12 12'];
+export const SVG_SETA_CIMA = ['M12 19V5', 'M5 12l7-7 7 7'];
+export const SVG_SETA_BAIXO = ['M12 5v14', 'M19 12l-7 7-7-7'];
+
 export const img = (src, cls, alt = '') => h('img', { src, class: cls, alt, draggable: 'false' });
 
 export class ErroApi extends Error {
@@ -84,6 +109,21 @@ export const qs = (o) => {
   return s ? `?${s}` : '';
 };
 
+// --- tema escuro / claro ---
+const TEMA_CHAVE = 'simTema';
+export function temaAtual() {
+  try { return localStorage.getItem(TEMA_CHAVE) === 'escuro' ? 'escuro' : 'claro'; } catch { return 'claro'; }
+}
+export function aplicarTema(tema) {
+  const escuro = tema === 'escuro';
+  try { localStorage.setItem(TEMA_CHAVE, escuro ? 'escuro' : 'claro'); } catch { /* ignora */ }
+  document.documentElement.dataset.tema = escuro ? 'escuro' : 'claro';
+  document.documentElement.style.colorScheme = escuro ? 'dark' : 'light';
+  const app = document.getElementById('app');
+  if (app) app.classList.toggle('escuro', escuro);
+  return escuro ? 'escuro' : 'claro';
+}
+
 // --- camadas (toast, diálogo, espera) ---
 const camadas = () => document.getElementById('camadas');
 
@@ -99,12 +139,9 @@ export function espera(texto = 'Passando o tempo…') {
   return () => e.remove();
 }
 
-// dialogo({ topo, titulo, corpo, botoes:[{rotulo, fn, p}], luto, fechavel, aoFechar, aoVoltar, rolagem }) -> { fechar, voltar, dlg, ... }
-// O fn de um botão roda ANTES de o diálogo fechar (síncrono); se devolver uma promessa, ela é aguardada depois.
-// Sem `botoes` (e fechável), ganha um botão "Voltar" fixo no rodapé: fecha e, se houver `aoVoltar`, abre a tela anterior.
-// `rolagem` (texto ou função que devolve o texto) = chave onde a posição de rolagem é lembrada; salva ao fechar e restaura ao abrir.
+// dialogo({ topo, titulo, corpo, botoes, luto, fechavel, aoFechar, aoVoltar, rolagem })
 export function dialogo({ topo, titulo, corpo, botoes = [], luto = false, fechavel = true, aoFechar, aoVoltar, rolagem }) {
-  const fundo = h('div', { class: 'fundo', role: 'dialog', 'aria-modal': 'true' });
+  const fundo = h('div', { class: 'fundo', role: 'dialog', 'aria-modal': 'true', ...(titulo ? { 'aria-label': titulo } : {}) });
   let aberto = true;
   const chaveRol = () => (typeof rolagem === 'function' ? rolagem() : rolagem);
   const salvarRolagem = (k = chaveRol()) => { if (k && aberto) memoria.gravar(k, dlg.scrollTop); };
@@ -125,31 +162,43 @@ export function dialogo({ topo, titulo, corpo, botoes = [], luto = false, fechav
     if (aoVoltar) aoVoltar();
     return true;
   };
-  const tecla = (ev) => { if (ev.key === 'Escape' && fechavel && camadas().lastElementChild === fundo) voltar(); };
+  const tecla = (ev) => {
+    if (camadas().lastElementChild !== fundo) return;
+    if (ev.key === 'Escape' && fechavel) voltar();
+  };
   const comVoltar = fechavel && botoes.length === 0;
-  const lista = comVoltar ? [{ rotulo: 'Voltar', p: true, voltar: true }] : botoes;
+  const lista = comVoltar ? [{ rotulo: 'Fechar', p: true, fecharDireto: true }] : botoes;
+  const cab = (fechavel && (titulo || aoVoltar))
+    ? h('div', { class: 'dlg-cab' },
+        aoVoltar
+          ? h('button', { class: 'voltar-seta', type: 'button', 'aria-label': 'Voltar para tela anterior', title: 'Voltar para tela anterior', onclick: voltar }, iconeSvg(SVG_SETA_ESQ, 20))
+          : h('span', { class: 'dlg-esp' }),
+        titulo ? h('h2', null, titulo) : h('span', { class: 'dlg-esp' }),
+        h('button', { class: 'voltar-seta', type: 'button', 'aria-label': 'Fechar janela', title: 'Fechar (Esc)', onclick: fechar }, iconeSvg(SVG_FECHAR, 18)))
+    : (titulo ? h('h2', null, titulo) : null);
+
   const dlg = h('div', { class: `dlg${luto ? ' luto' : ''}` },
-    topo, titulo && h('h2', null, titulo), corpo,
+    topo, cab, corpo,
     h('div', { class: `acoes${comVoltar ? ' fixa' : ''}` }, lista.map((b) => h('button', {
       class: `btn${b.p ? ' p' : ''} m`, type: 'button',
       onclick: async () => {
+        if (b.fecharDireto) { fechar(); return; }
         if (b.voltar) { voltar(); return; }
         const r = b.fn ? b.fn() : undefined;
         if (b.fechar !== false) fechar();
         await r;
       },
     }, b.rotulo))));
-  fundo.__voltar = voltar;     // botão físico "voltar" do Android (ver window.__simVoltar em app.js)
+  fundo.__voltar = voltar;
   fundo.append(dlg);
   if (fechavel) fundo.addEventListener('mousedown', (ev) => { if (ev.target === fundo) fechar(); });
   document.addEventListener('keydown', tecla);
   camadas().append(fundo);
-  dlg.querySelector('button')?.focus({ preventScroll: true });
+  dlg.querySelector('.dlg-cab .voltar-seta, button')?.focus({ preventScroll: true });
   if (chaveRol()) restaurarRolagem();
   return { fechar, voltar, dlg, salvarRolagem, restaurarRolagem };
 }
 
-// Pergunta sim/não; fechar por Esc ou clique fora conta como "não".
 export function confirmar(titulo, texto, rotuloSim = 'Sim', rotuloNao = 'Não') {
   return new Promise((res) => {
     let r = false;
@@ -167,13 +216,10 @@ export function barra(valor, cor) {
 
 export const brl = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-// --- formulários ---
 export function campo(rotulo, entrada, dica) {
   return h('label', { class: 'campo' }, h('span', null, rotulo), entrada, dica && h('small', { class: 'dica' }, dica));
 }
 
-// Controle segmentado: opcoes = [[valor, rótulo], ...]; el.valor() devolve o escolhido.
-// Com `chave`, lembra a opção escolhida (se ela ainda existir).
 export function seg(opcoes, inicial, aoMudar, chave) {
   let v = inicial;
   if (chave) {

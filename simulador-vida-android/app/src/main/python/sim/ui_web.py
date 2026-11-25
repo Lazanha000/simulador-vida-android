@@ -390,11 +390,13 @@ class App:
                 if rota in (
                     "psicologia/habito", "psicologia/meta", "psicologia/qi",
                     "vinculos/interagir", "encontros/preferencia",
-                    "intelecto/estudar", "intelecto/ensaio", "intelecto/artigo", "intelecto/filme",
+                    "intelecto/estudar", "intelecto/estudar_lote", "intelecto/ensaio", "intelecto/artigo", "intelecto/filme",
                     "intelecto/revisar", "intelecto/grupo", "intelecto/idioma", "intelecto/pesquisar",
+                    "livros/fila/adicionar", "livros/fila/remover", "livros/fila/mover", "livros/fila/limpar", "livros/fila/auto", "livros/ler_fila",
                     "educacao/enem", "educacao/ingressar", "educacao/ic", "educacao/pos", "educacao/tecnico",
                     "carreiras/concurso", "carreiras/abrir_empresa", "carreiras/encerrar_empresa",
                     "carreiras/expandir_empresa", "carreiras/meio_periodo", "carreiras/sair_meio_periodo", "carreiras/freela",
+                    "carreiras/freela_lote", "carreiras/trabalho_extra",
                     "politica/filiar", "politica/campanha", "politica/concorrer",
                     "politica/movimento", "politica/projeto",
                     "mundo/mudar_cidade", "mundo/comprar_imovel", "mundo/vender_imovel",
@@ -416,6 +418,9 @@ class App:
                             r = encontros.definir_preferencia(game, str(corpo.get("pref", "oposto")))
                         elif rota == "intelecto/estudar":
                             r = intelecto.estudar(game, str(corpo.get("modo", "escola")), corpo.get("area") or None)
+                        elif rota == "intelecto/estudar_lote":
+                            sessoes = int(corpo["sessoes"]) if corpo.get("sessoes") not in (None, "") else None
+                            r = intelecto.estudar_lote(game, str(corpo.get("modo", "escola")), corpo.get("area") or None, sessoes)
                         elif rota == "intelecto/ensaio":
                             r = intelecto.escrever_ensaio(game, str(corpo.get("tema", "")), str(corpo.get("tipo", "redacao")))
                         elif rota == "intelecto/artigo":
@@ -430,6 +435,18 @@ class App:
                             r = intelecto.estudar_idioma(game, str(corpo.get("idioma", "")))
                         elif rota == "intelecto/pesquisar":
                             r = intelecto.pesquisar_e_publicar(game, str(corpo.get("sub", "")))
+                        elif rota == "livros/fila/adicionar":
+                            r = livros.fila_adicionar(game, str(corpo.get("id", "")))
+                        elif rota == "livros/fila/remover":
+                            r = livros.fila_remover(game, str(corpo.get("id", "")))
+                        elif rota == "livros/fila/mover":
+                            r = livros.fila_mover(game, str(corpo.get("id", "")), corpo.get("delta", 1))
+                        elif rota == "livros/fila/limpar":
+                            r = livros.fila_limpar(game)
+                        elif rota == "livros/fila/auto":
+                            r = livros.fila_auto(game, corpo.get("ativar") if "ativar" in corpo else None)
+                        elif rota == "livros/ler_fila":
+                            r = livros.ler_fila(game)
                         elif rota == "educacao/enem":
                             r = educacao_br.fazer_enem(game)
                         elif rota == "educacao/ingressar":
@@ -454,6 +471,10 @@ class App:
                             r = carreiras.sair_meio_periodo(game)
                         elif rota == "carreiras/freela":
                             r = carreiras.fazer_freela(game, str(corpo.get("area", "economia")))
+                        elif rota == "carreiras/freela_lote":
+                            r = carreiras.fazer_freelas_lote(game, str(corpo.get("area", "economia")))
+                        elif rota == "carreiras/trabalho_extra":
+                            r = carreiras.trabalho_extra(game)
                         elif rota == "politica/filiar":
                             r = carreiras.filiar(game, str(corpo.get("partido", "")))
                         elif rota == "politica/campanha":

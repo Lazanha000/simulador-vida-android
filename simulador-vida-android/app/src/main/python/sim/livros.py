@@ -431,7 +431,7 @@ def view(game: Game, genero: str | None = None, busca: str | None = None) -> dic
     if p is None:
         return {
             "disponivel": False, "motivo": "Nenhum personagem vivo.", "itens": [],
-            "nao_lidos": [], "em_andamento": [], "lidos": [],
+            "nao_lidos": [], "em_andamento": [], "lidos": [], "fila": [], "fila_ids": [], "auto_ler_fila": False,
             "total_lidos": 0, "total_catalogo": len(CATALOGO),
             "paginas_mes_total": 0, "paginas_mes_usadas": 0, "paginas_mes_restantes": 0,
             "interesses": {}, "conhecimentos": {}, "generos": generos,
@@ -439,17 +439,16 @@ def view(game: Game, genero: str | None = None, busca: str | None = None) -> dic
     lidos_set = set(game.livros.get(p.id, []))
     st = intelecto.dados(game, p.id)
     progresso_map = st.get("progresso_livros", {})
+    fila_ids = fila_of(game, p.id)
+    fila_set = set(fila_ids)
     cap_total = capacidade_mes(game, p)
     usadas = paginas_usadas_mes(game, p.id)
     restantes = max(0, cap_total - usadas)
     termo = (busca or "").strip().lower()
 
     itens = []
+    por_id_item = {}
     for id_, titulo, autor, ano, gen, nivel in CATALOGO:
-        if genero and gen != genero:
-            continue
-        if termo and termo not in titulo.lower() and termo not in autor.lower():
-            continue
         lido = id_ in lidos_set
         total_pags = paginas_livro(id_)
         prog = total_pags if lido else min(total_pags, int(progresso_map.get(id_, 0)))
@@ -457,18 +456,26 @@ def view(game: Game, genero: str | None = None, busca: str | None = None) -> dic
         areas = conhecimentos_livro(id_)
         area_rotulos = [intelecto.AREAS_POR_ID[a][1] for a in areas if a in intelecto.AREAS_POR_ID]
         m = _motivo(game, p, nivel, lido)
-        itens.append({
+        card = {
             "id": id_, "titulo": titulo, "autor": autor, "ano": ano, "genero": gen, "nivel": nivel,
             "paginas": total_pags, "progresso": prog, "faltam": max(0, total_pags - prog), "percentual": pct,
             "conhecimentos": list(areas), "conhecimento_rotulos": area_rotulos,
             "cog_principal": GENERO_COGNICAO.get(gen, "compreensao_verbal"),
             "lido": lido, "em_andamento": (not lido and prog > 0),
+            "na_fila": id_ in fila_set,
             "pode": m is None and restantes > 0, "motivo": m,
-        })
+        }
+        por_id_item[id_] = card
+        if genero and gen != genero:
+            continue
+        if termo and termo not in titulo.lower() and termo not in autor.lower():
+            continue
+        itens.append(card)
 
     nao_lidos = [x for x in itens if not x["lido"]]
     em_andamento = [x for x in nao_lidos if x["em_andamento"]]
     lidos_itens = [x for x in itens if x["lido"]]
+    fila_itens = [dict(por_id_item[lid], pos=idx + 1) for idx, lid in enumerate(fila_ids) if lid in por_id_item]
     motivo_mes = None if restantes > 0 else "Capacidade de leitura deste mês esgotada. Avance o mês para continuar."
     return {
         "disponivel": restantes > 0,
@@ -477,6 +484,9 @@ def view(game: Game, genero: str | None = None, busca: str | None = None) -> dic
         "nao_lidos": nao_lidos,
         "em_andamento": em_andamento,
         "lidos": lidos_itens,
+        "fila": fila_itens,
+        "fila_ids": fila_ids,
+        "auto_ler_fila": bool(st.get("auto_ler_fila", False)),
         "total_lidos": len(lidos_set),
         "total_catalogo": len(CATALOGO),
         "paginas_mes_total": cap_total,
@@ -533,6 +543,9 @@ def ler(game: Game, livro_id: str, paginas: int | None = None) -> dict:
     if concluido:
         prog_map.pop(livro_id, None)
         lidos.append(livro_id)
+        fila = st.get("fila_leitura")
+        if isinstance(fila, list) and livro_id in fila:
+            fila[:] = [x for x in fila if x != livro_id]
         game.convivio[(-4, p.id)] = mes
 
         # Ganho garantido de compreensão verbal + habilidade específica do gênero/nível
@@ -573,4 +586,156 @@ def ler(game: Game, livro_id: str, paginas: int | None = None) -> dict:
         "paginas_restantes_mes": max(0, cap_total - (usadas + lidas_agora)),
         "ganhos": ganhos,
         "conhecimentos": [intelecto.AREAS_POR_ID[a][1] for a in areas if a in intelecto.AREAS_POR_ID],
+    }
+
+
+def fila_of(game: Game, cid: int) -> list[str]:
+    """Lista ordenada de IDs na lista de leitura (limpa IDs inválidos ou já concluídos)."""
+    st = intelecto.dados(game, cid)
+    lidos = set(game.livros.get(cid, []))
+    bruta = st.get("fila_leitura", [])
+    limpa = []
+    vistos = set()
+    for lid in bruta:
+        if lid in _POR_ID and lid not in lidos and lid not in vistos:
+            limpa.append(lid)
+            vistos.add(lid)
+    if limpa != bruta:
+        st["fila_leitura"] = limpa
+    return list(limpa)
+
+
+def fila_adicionar(game: Game, livro_id: str) -> dict:
+    p = _jogador(game)
+    if p is None:
+        raise ValueError("Nenhum personagem vivo do jogador.")
+    if livro_id not in _POR_ID:
+        raise ValueError("Livro inexistente.")
+    if livro_id in game.livros.get(p.id, []):
+        raise ValueError("Este livro já foi concluído.")
+    fila = fila_of(game, p.id)
+    st = intelecto.dados(game, p.id)
+    titulo = _POR_ID[livro_id][1]
+    if livro_id not in fila:
+        fila.append(livro_id)
+        st["fila_leitura"] = fila
+    return {"id": livro_id, "titulo": titulo, "fila": list(fila), "tamanho": len(fila)}
+
+
+def fila_remover(game: Game, livro_id: str) -> dict:
+    p = _jogador(game)
+    if p is None:
+        raise ValueError("Nenhum personagem vivo do jogador.")
+    fila = [x for x in fila_of(game, p.id) if x != livro_id]
+    intelecto.dados(game, p.id)["fila_leitura"] = fila
+    return {"id": livro_id, "fila": list(fila), "tamanho": len(fila)}
+
+
+def fila_mover(game: Game, livro_id: str, delta: int | str) -> dict:
+    p = _jogador(game)
+    if p is None:
+        raise ValueError("Nenhum personagem vivo do jogador.")
+    fila = fila_of(game, p.id)
+    if livro_id not in fila:
+        raise ValueError("Livro não está na lista de leitura.")
+    if delta in ("subir", -1, "-1"):
+        passo = -1
+    elif delta in ("descer", 1, "1"):
+        passo = 1
+    else:
+        raise ValueError("Direção inválida (use -1 ou 1).")
+    i = fila.index(livro_id)
+    j = i + passo
+    if 0 <= j < len(fila):
+        fila[i], fila[j] = fila[j], fila[i]
+        intelecto.dados(game, p.id)["fila_leitura"] = fila
+    return {"id": livro_id, "fila": list(fila), "posicao": fila.index(livro_id) + 1}
+
+
+def fila_limpar(game: Game) -> dict:
+    p = _jogador(game)
+    if p is None:
+        raise ValueError("Nenhum personagem vivo do jogador.")
+    intelecto.dados(game, p.id)["fila_leitura"] = []
+    return {"fila": [], "tamanho": 0}
+
+
+def fila_auto(game: Game, ativar: bool | None = None) -> dict:
+    p = _jogador(game)
+    if p is None:
+        raise ValueError("Nenhum personagem vivo do jogador.")
+    st = intelecto.dados(game, p.id)
+    atual = bool(st.get("auto_ler_fila", False))
+    novo = (not atual) if ativar is None else bool(ativar)
+    st["auto_ler_fila"] = novo
+    return {"auto_ler": novo}
+
+
+def ler_fila(game: Game, silencioso: bool = False) -> dict:
+    """Lê os livros da lista de leitura na ordem configurada até acabar a fila ou a capacidade do mês."""
+    p = _jogador(game)
+    if p is None:
+        if silencioso:
+            return {"concluidos": 0, "em_andamento": 0, "paginas_lidas": 0, "livros": [], "fila_restante": 0}
+        raise ValueError("Nenhum personagem vivo do jogador.")
+    fila = fila_of(game, p.id)
+    if not fila:
+        if silencioso:
+            return {"concluidos": 0, "em_andamento": 0, "paginas_lidas": 0, "livros": [], "fila_restante": 0}
+        raise ValueError("Sua lista de leitura está vazia.")
+
+    cap_total = capacidade_mes(game, p)
+    usadas = paginas_usadas_mes(game, p.id)
+    restantes = max(0, cap_total - usadas)
+    if restantes <= 0:
+        if silencioso:
+            return {"concluidos": 0, "em_andamento": 0, "paginas_lidas": 0, "livros": [], "fila_restante": len(fila)}
+        raise ValueError("Capacidade de leitura deste mês esgotada. Avance o mês para continuar.")
+
+    resultados = []
+    pags_totais = 0
+    concluidos = 0
+    parciais = 0
+
+    while restantes > 0:
+        fila_atual = fila_of(game, p.id)
+        lidos_set = set(game.livros.get(p.id, []))
+        alvo = None
+        for lid in fila_atual:
+            obra = _POR_ID.get(lid)
+            if obra and _motivo(game, p, obra[5], lid in lidos_set) is None:
+                alvo = lid
+                break
+        if alvo is None:
+            break
+        r = ler(game, alvo)
+        resultados.append(r)
+        pags_totais += r["paginas_lidas_agora"]
+        restantes = r["paginas_restantes_mes"]
+        if r["concluido"]:
+            concluidos += 1
+        else:
+            parciais += 1
+            break
+
+    if not resultados:
+        if silencioso:
+            return {"concluidos": 0, "em_andamento": 0, "paginas_lidas": 0, "livros": [], "fila_restante": len(fila_of(game, p.id))}
+        raise ValueError("Nenhum livro da lista está liberado agora (verifique idade ou compreensão verbal).")
+
+    fila_rest = len(fila_of(game, p.id))
+    partes = []
+    if concluidos:
+        partes.append(f"{concluidos} livro(s) concluído(s)")
+    if parciais:
+        partes.append(f"{parciais} em andamento")
+    msg = f"Lista de leitura: {' e '.join(partes)} ({pags_totais} págs). Restam {restantes} págs no mês."
+    return {
+        "concluidos": concluidos,
+        "em_andamento": parciais,
+        "paginas_lidas": pags_totais,
+        "paginas_restantes_mes": restantes,
+        "livros": resultados,
+        "fila_restante": fila_rest,
+        "mensagem": msg,
     }

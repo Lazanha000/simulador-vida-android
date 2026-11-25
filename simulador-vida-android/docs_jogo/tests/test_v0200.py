@@ -26,8 +26,8 @@ def _jogo(idade=22, seed=42, riqueza=200000.0, sexo="F"):
 
 class TestVersaoESchemaV0200(unittest.TestCase):
     def test_versao_e_schema(self):
-        self.assertEqual(sim.__version__, "0.20.0")
-        self.assertEqual(persistence.SCHEMA_VERSION, 19)
+        self.assertGreaterEqual(tuple(int(x) for x in sim.__version__.split(".")), (0, 20, 0))
+        self.assertGreaterEqual(persistence.SCHEMA_VERSION, 19)
         self.assertIn("19", persistence.SUPPORTED_VERSIONS)
         self.assertIn("18", persistence.SUPPORTED_VERSIONS)
 
@@ -257,7 +257,7 @@ class TestEducacaoTrabalhoECarreirasV0200(unittest.TestCase):
         setor_occs = {k for s in firms.SETORES.values() for k in s}
         self.assertTrue(novas.issubset(setor_occs))
 
-        self.assertEqual(len(educacao_br.CURSOS), 10)
+        self.assertGreaterEqual(len(educacao_br.CURSOS), 10)
         self.assertEqual(set(educacao_br.CURSO_TIPO), {c[0] for c in educacao_br.CURSOS})
         self.assertEqual(educacao_br.CURSO_TIPO["design"], "Tecnólogo")
         self.assertEqual(len(educacao_br.CURSOS_TECNICOS), 5)

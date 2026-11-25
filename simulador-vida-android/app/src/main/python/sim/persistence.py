@@ -8,7 +8,7 @@ import sqlite3
 from . import economy, factory, firms, work
 from .models import BioEvent, Character, Family, Firm, Game
 
-SCHEMA_VERSION = 19
+SCHEMA_VERSION = 20
 # Versões antigas legíveis (v7 = trabalho; v8 = carreira e economia; v9 = empresas e vagas; v10 = seguro-desemprego). v1 não tem spouse_id; v2 não tem cognition_potential/ex_spouse_id
 # (potencial = cognição atual, ex = None);
 # o arquivo só é convertido para a versão atual no próximo salvamento.

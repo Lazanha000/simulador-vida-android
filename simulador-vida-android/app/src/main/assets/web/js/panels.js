@@ -1,8 +1,8 @@
 // Painéis de detalhe: folhas empilhadas, menu em grade e renderizador genérico dos blocos enviados por sim/panels.py.
-import { $, A, api, barra, campo, dialogo, h, img, memoria, qs, seg, toast } from './ui.js';
+import { $, A, SVG_SETA_ESQ, api, barra, campo, dialogo, h, iconeSvg, img, memoria, qs, seg, temaAtual, toast } from './ui.js';
 
 const pilha = [];      // folhas abertas: { el, nome, q }
-let ctx = {};          // callbacks do app: jogar(id), salvar(), titulo(), texto(delta), atualizar()
+let ctx = {};          // callbacks do app: jogar(id), salvar(), titulo(), texto(delta), atualizar(), abrirModal(m), registrarTela(t), alternarTema()
 export const iniciarPaineis = (c) => { ctx = c; };
 
 const camadas = () => document.getElementById('camadas');
@@ -20,8 +20,6 @@ export function fecharTopo() {
   if (f) { salvarFolha(f); f.largar?.(); f.el.remove(); }
 }
 
-// Memória de painéis (v0.19.0): a consulta (busca, filtros, página) e a rolagem de cada painel voltam como estavam.
-// A ficha de um personagem (tem `id`) não é lembrada.
 const chaveFolha = (nome, q) => (q && q.id != null ? null : `painel.${nome}`);
 function salvarFolha(f) {
   if (!f.k) return;
@@ -43,12 +41,14 @@ function criarFolha(nome, q) {
 }
 
 function titulo(f, icone, texto) {
-  f.topo.classList.toggle('longo', String(texto).length > 14);   // títulos longos encolhem para caber na faixa
-  f.topo.replaceChildren(...(icone ? [img(A(icone), '')] : []), h('span', null, texto));
+  f.topo.classList.toggle('longo', String(texto).length > 14);
+  const btnVoltar = h('button', {
+    class: 'voltar-seta', type: 'button', 'aria-label': 'Voltar', title: 'Voltar (Esc)', onclick: fecharTopo,
+  }, iconeSvg(SVG_SETA_ESQ, 20));
+  const centro = h('span', { class: 'faixa-centro' }, icone && img(A(icone), ''), h('span', null, texto));
+  f.topo.replaceChildren(btnVoltar, centro, h('span', { class: 'dlg-esp' }));
 }
 
-// Abre (ou, com `substituir`, recarrega no lugar) um painel enviado pelo servidor.
-// Aberto sem consulta (pelo menu, por exemplo), volta com a última busca/filtro/página e a rolagem de onde parou.
 export async function abrirPainel(nome, q = {}, { substituir = false, lembrado = false } = {}) {
   const topo = pilha.at(-1);
   const reaproveita = substituir && topo && topo.nome === nome;
@@ -68,9 +68,12 @@ export async function abrirPainel(nome, q = {}, { substituir = false, lembrado =
     f.carregada = true;
     f.corpo.scrollTop = reaproveita ? rolagem : (f.k ? Number(memoria.ler(`${f.k}.y`, 0)) || 0 : 0);
     if (f.k) memoria.gravar(`${f.k}.q`, q);
+    if (nome !== 'ficha' && nome !== 'menu') {
+      ctx.registrarTela?.({ tipo: 'painel', id: nome, q, rotulo: d.titulo || nome });
+    }
   } catch (e) {
     if (pilha.includes(f)) { pilha.splice(pilha.indexOf(f), 1); f.largar?.(); f.el.remove(); }
-    if (restaurou) {   // consulta lembrada deixou de valer: esquece e abre do zero
+    if (restaurou) {
       memoria.gravar(`${chaveFolha(nome, {})}.q`, {});
       return abrirPainel(nome, {}, { lembrado: true });
     }
@@ -119,6 +122,12 @@ function linhaPessoa(p) {
     p.rel && h('span', { class: 'rel' }, p.rel));
 }
 
+function rotuloAcaoConfig(a) {
+  if (a.acao === 'lembrar') return `Lembrar onde eu estava: ${memoria.ligada() ? 'ligado' : 'desligado'}`;
+  if (a.acao === 'tema') return `Aparência: ${temaAtual() === 'escuro' ? 'Modo escuro 🌙' : 'Modo claro ☀'} (alternar)`;
+  return a.rotulo;
+}
+
 const RENDER = {
   linhas: (b) => bloco(b.titulo, b.itens.map((i) => h('div', { class: 'lin' }, h('span', { class: 'r' }, i.r),
     h('span', { class: 'v' }, i.i && img(A(i.i), ''), i.v)))),
@@ -152,9 +161,9 @@ const RENDER = {
 
   acoes: (b, f) => h('section', { class: 'bloco' }, b.itens.map((a) => h('button', {
     class: 'btn p m', type: 'button', onclick: () => executar(a, f),
-  }, a.acao === 'lembrar' ? `Lembrar onde eu estava: ${memoria.ligada() ? 'ligado' : 'desligado'}` : a.rotulo))),
+  }, rotuloAcaoConfig(a)))),
 
-  filtros: (b, f) => {
+  filtros: (b) => {
     const cat = h('select', { 'aria-label': 'Categoria' }, b.categorias.map((c) => h('option', { value: c.id, selected: c.id === b.cat }, c.rotulo)));
     const de = h('input', { type: 'number', placeholder: 'ano', value: b.de ?? '', 'aria-label': 'Ano inicial' });
     const ate = h('input', { type: 'number', placeholder: 'ano', value: b.ate ?? '', 'aria-label': 'Ano final' });
@@ -172,7 +181,6 @@ const RENDER = {
   },
 };
 
-// --- ações vindas dos blocos ---
 async function executar(a, folha) {
   try {
     if (a.acao === 'jogar') { await ctx.jogar(a.id); fecharTodas(); }
@@ -185,6 +193,7 @@ async function executar(a, folha) {
     else if (a.acao === 'pref_afetiva') { await api('encontros/preferencia', { pref: a.valor }); await ctx.atualizar(); await abrirPainel(folha.nome, folha.q, { substituir: true }); }
     else if (a.acao === 'salvar') { await ctx.salvar(); await abrirPainel(folha.nome, folha.q, { substituir: true }); }
     else if (a.acao === 'texto') { ctx.texto(a.delta); }
+    else if (a.acao === 'tema') { ctx.alternarTema?.(); await abrirPainel(folha.nome, folha.q, { substituir: true }); }
     else if (a.acao === 'lembrar') {
       memoria.ligar(!memoria.ligada());
       toast(memoria.ligada() ? 'O jogo vai lembrar onde você estava (buscas, filtros, abas e rolagem).' : 'Memória desligada e apagada.');

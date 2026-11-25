@@ -20,6 +20,11 @@ SALARIO_BASE = {
     "professor": 3.0, "engenheiro": 6.0, "advogado": 5.5, "enfermeiro": 3.2, "contador": 4.0,
     "analista_sistemas": 5.0, "medico": 12.0,
     "psicologo": 3.8, "economista": 4.8, "pesquisador": 4.2, "designer": 3.5,
+    "administrador": 4.2, "arquiteto": 5.0, "dentista": 5.6, "farmaceutico": 3.9,
+    "fisioterapeuta": 3.5, "nutricionista": 3.4, "veterinario": 4.1, "agronomo": 4.9,
+    "biologo": 3.6, "quimico": 4.3, "jornalista": 3.7, "publicitario": 3.8,
+    "analista_ri": 4.6, "estatistico": 5.4, "assistente_social": 3.1,
+    "sociologo": 3.4, "matematico": 4.7,
 }
 FATOR_NIVEL = (1.0, 1.25, 1.6, 2.2)   # júnior, pleno, sênior, chefia
 FATOR_INFORMAL = 0.8

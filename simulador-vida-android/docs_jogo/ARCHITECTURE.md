@@ -8,7 +8,7 @@
 | Arquivo | Responsabilidade |
 |---|---|
 | `sim/models.py` | Dados puros: `Character`, `Family`, `Firm`, `BioEvent`, `Game` (estado da partida, calendário, biografia, amizades). Sem regras. |
-| `sim/work.py` | Trabalho (v0.6.0): tabela de ocupações genéricas e regras puras (elegibilidade, contratação, perda de emprego, aposentadoria, situação inicial). Sem dependência do motor; importado por `factory`, `engine`, `persistence` e `ui_cli`. |
+| `sim/work.py` | Trabalho (v0.6.0–v0.21.0): tabela de 36 ocupações (genéricas e graduadas) e regras puras (elegibilidade, contratação, perda de emprego, aposentadoria, situação inicial). Sem dependência do motor; importado por `factory`, `engine`, `persistence` e `ui_cli`. |
 | `sim/firms.py` | Empresas e vagas (v0.8.0): criação determinística de empresas genéricas, vagas por ocupação, escolha de empresa, fechamento, rebalanceamento anual e panorama de vacância. Sem `game.rng` (gerador local da semente). Importa `work` e `models`; `work.start_job` e `economy` o usam (import tardio em `start_job` evita ciclo). |
 | (gestação, v0.12.0) | Vive em `sim/engine.py` (`_conceive`, `_pregnancy_step`, `_births`): campos `pregnant_until`/`pregnancy_father_id` em `Character`; perda, gêmeos e morte materna usam gerador local por (semente, mês, mãe). |
 | `sim/romance.py` | Namoro (v0.11.0): casais, término e pedido de casamento. Sem `game.rng` (gerador local por semente/mês/id). Usa `engine` por import tardio (funções de parentesco, casamento, círculo social, afinidade). `engine._tick` chama `romance.run` depois dos divórcios e antes dos casamentos. |
@@ -17,17 +17,17 @@
 | `sim/economy.py` | Economia (v0.7.0; seguro-desemprego 0.9.1; prêmio por porte 0.9.2): salário, benefício, domicílios, custo de vida, poupança/dívida, herança, Gini e panorama. Funções puras ou determinísticas, sem `game.rng`. Importa `work` e `models`; importado por `factory`, `engine`, `persistence` e `ui_cli`. |
 | `sim/factory.py` | Criação de partida, personagens e famílias (datas de nascimento coerentes); herança de traços e fração de desenvolvimento cognitivo. |
 | `sim/engine.py` | Passagem do tempo (`advance_months`), idade, etapas, saúde, mortalidade, morte, luto, nascimentos (`_births`), escola (`_school`, inclui superior e retorno aos estudos), trabalho (`_work`), amizades (`_friendships`), divórcios (`_divorces`) e casamentos (`_marriages`, escolhe parceiro no círculo social), nessa ordem, depois das mortes de cada mês. |
-| `sim/persistence.py` | Salvar/carregar em SQLite (esquema **v19**, tolera saves v1–v18), gravação atômica via arquivo temporário. |
+| `sim/persistence.py` | Salvar/carregar em SQLite (esquema **v20**, tolera saves v1–v19), gravação atômica via arquivo temporário. |
 | `sim/psicologia.py` | Psicologia, valores, medos, 4 hábitos mensais, 15 metas de vida e QI opcional (v0.20.0; sem `game.rng`). |
 | `sim/vinculos.py` | Vínculos multidimensionais (afinidade, confiança, intimidade, respeito, hostilidade, memórias), família, colegas e rivais/inimigos (v0.20.0; sem `game.rng`). |
-| `sim/intelecto.py` | Estudo dirigido, redação/ensaio, artigos, filmes, 16 áreas enciclopédicas (48 subdisciplinas), 6 idiomas, revisão espaçada, grupos de estudo, pesquisa e curva de esquecimento (v0.18.0–v0.20.0). |
-| `sim/livros.py` | Catálogo de 205 obras reais, leitura por páginas, capacidade mensal e ganho de cognição/conhecimentos (v0.15.11–v0.20.0). |
-| `sim/educacao_br.py` | ENEM, universidades brasileiras, SISU/PROUNI/FIES, vestibular, IC, pós-graduação e cursos técnicos (v0.17.0–v0.20.0). |
-| `sim/carreiras.py` | Concursos públicos, abertura e expansão de empresas, estágio/meio período, freelancers, política, movimentos sociais e projetos de lei (v0.17.0–v0.20.0). |
+| `sim/intelecto.py` | Estudo dirigido e em lote, redação/ensaio, artigos, filmes, 16 áreas enciclopédicas (48 subdisciplinas), 6 idiomas, revisão espaçada, grupos de estudo, pesquisa e curva de esquecimento (v0.18.0–v0.21.0). |
+| `sim/livros.py` | Catálogo de 205 obras reais, leitura por páginas, lista de leitura ordenada (`fila_leitura` + `ler_fila`), leitura automática mensal e ganho de cognição/conhecimentos (v0.15.11–v0.21.0). |
+| `sim/educacao_br.py` | ENEM, universidades brasileiras, SISU/PROUNI/FIES, 34 cursos reais com áreas/tipos, vestibular, IC, pós-graduação e cursos técnicos (v0.17.0–v0.21.0). |
+| `sim/carreiras.py` | Concursos públicos, abertura e expansão de empresas, estágio/meio período, freelancers (individual/lote), hora extra, política, movimentos sociais e projetos de lei (v0.17.0–v0.21.0). |
 | `sim/mundo.py` | Cidades brasileiras, imóveis, veículos, equipamentos pessoais, plano de saúde, investimentos, empréstimos, extrato financeiro e noticiário `[REAL]`/`[SIMULADA]` (v0.17.0–v0.20.0). |
 | `sim/decisions.py` | Eventos interativos de 3 opções e consequências com atraso (v0.15.0–v0.20.0). |
-| `sim/views.py` & `sim/panels.py` | Serialização de estado, avanço mensal com pausas em decisão e painéis de leitura da UI web. |
-| `sim/ui_web.py` & `sim/ui_cli.py` | Servidor HTTP local + WebView Android e modo CLI. Não contêm regras de simulação. |
+| `sim/views.py` & `sim/panels.py` | Serialização de estado, avanço mensal com pausas em decisão (e leitura automática da lista), painéis de leitura da UI web e atalho de tema. |
+| `sim/ui_web.py` & `sim/ui_cli.py` | Servidor HTTP local + WebView Android (navegação 1-clique para última tela, modo escuro) e modo CLI. Não contêm regras de simulação. |
 | `main.py` & `android_launcher.py` | Pontos de entrada desktop/CLI e Android (Chaquopy). |
 
 ## Regras de projeto
