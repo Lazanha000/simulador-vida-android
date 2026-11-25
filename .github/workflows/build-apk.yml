@@ -1,4 +1,5 @@
 
+
 name: Build APK
 
 on:
@@ -17,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Java
@@ -39,21 +40,56 @@ jobs:
         with:
           gradle-version: "8.7"
 
-      - name: Build APK
+      - name: Extract Android project
+        run: |
+          ZIP_FILE="$(find . -maxdepth 1 -type f -iname '*.zip' -print -quit)"
+
+          if [ -z "$ZIP_FILE" ]; then
+            echo "ERRO: Nenhum arquivo ZIP encontrado na raiz."
+            exit 1
+          fi
+
+          echo "Extraindo: $ZIP_FILE"
+          mkdir -p source
+          unzip -q "$ZIP_FILE" -d source
+
+          PROJECT_DIR="source/simulador-vida-android"
+
+          if [ ! -f "$PROJECT_DIR/settings.gradle.kts" ]; then
+            echo "ERRO: Projeto Android não encontrado."
+            find source -maxdepth 3 -type f
+            exit 1
+          fi
+
+          echo "ANDROID_PROJECT=$PROJECT_DIR" >> "$GITHUB_ENV"
+
+      - name: Build Debug APK
+        working-directory: source/simulador-vida-android
         run: gradle --no-daemon --stacktrace assembleDebug
 
       - name: Prepare APK
         run: |
           mkdir -p output
-          cp app/build/outputs/apk/debug/app-debug.apk output/simulador-vida.apk
 
-      - name: Upload APK
+          cp source/simulador-vida-android/app/build/outputs/apk/debug/app-debug.apk \
+            output/simulador-vida.apk
+
+          if [ ! -s output/simulador-vida.apk ]; then
+            echo "ERRO: APK não foi gerado corretamente."
+            exit 1
+          fi
+
+          ls -lh output/simulador-vida.apk
+
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: simulador-vida-apk
           path: output/simulador-vida.apk
+          if-no-files-found: error
+          retention-days: 30
 
-      - name: Publish latest release
+      - name: Publish Latest Release
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
@@ -61,9 +97,12 @@ jobs:
           name: Simulador de Vida - APK mais recente
           files: output/simulador-vida.apk
           make_latest: true
+          overwrite_files: true
 
-            - name: Publish version release
+      - name: Publish Version Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: output/simulador-vida.apk
+        
+          overwrite_files: true
