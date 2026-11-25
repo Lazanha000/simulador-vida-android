@@ -30,7 +30,7 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      # 3. Configurar Android SDK sem aceitação interativa
+      # 3. Configurar Android SDK
       - name: Setup Android SDK
         uses: android-actions/setup-android@v4
         with:
@@ -38,7 +38,7 @@ jobs:
           log-accepted-android-sdk-licenses: false
           packages: ""
 
-      # 4. Aceitar licenças explicitamente
+      # 4. Aceitar licenças Android
       - name: Accept Android SDK licenses
         shell: bash
         run: |
@@ -46,7 +46,7 @@ jobs:
           yes | sdkmanager --licenses > /dev/null || true
           sdkmanager --licenses
 
-      # 5. Instalar componentes necessários
+      # 5. Instalar componentes Android
       - name: Install Android SDK packages
         run: |
           sdkmanager \
@@ -60,7 +60,7 @@ jobs:
         with:
           gradle-version: "8.7"
 
-      # 7. Localizar ou extrair o projeto Android
+      # 7. Localizar ou extrair projeto Android
       - name: Locate Android project
         shell: bash
         run: |
@@ -98,7 +98,7 @@ jobs:
           echo "Projeto encontrado: $PROJECT_DIR"
           echo "ANDROID_PROJECT=$PROJECT_DIR" >> "$GITHUB_ENV"
 
-      # 8. Verificar estrutura do projeto
+      # 8. Validar estrutura Android
       - name: Validate Android project
         shell: bash
         run: |
@@ -131,6 +131,7 @@ jobs:
           fi
 
           mkdir -p "$GITHUB_WORKSPACE/output"
+
           cp "$APK" "$GITHUB_WORKSPACE/output/simulador-vida.apk"
 
           ls -lh "$GITHUB_WORKSPACE/output/simulador-vida.apk"
@@ -144,24 +145,41 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      # 12. Publicar versão mais recente
+      # 12. Criar ou atualizar Release latest
       - name: Publish Latest Release
         if: github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: latest
-          name: Simulador de Vida - APK mais recente
-          files: output/simulador-vida.apk
-          make_latest: true
-          overwrite_files: true
-          fail_on_unmatched_files: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view latest >/dev/null 2>&1; then
+
+            gh release upload latest \
+              output/simulador-vida.apk \
+              --clobber
+
+            gh release edit latest \
+              --title "Simulador de Vida - APK mais recente" \
+              --latest
+
+          else
+
+            gh release create latest \
+              output/simulador-vida.apk \
+              --title "Simulador de Vida - APK mais recente" \
+              --notes "Versão mais recente do Simulador de Vida." \
+              --target "$GITHUB_SHA" \
+              --latest
+
+          fi
 
       # 13. Publicar versões identificadas por tags
       - name: Publish Version Release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: output/simulador-vida.apk
-          overwrite_files: true
-          fail_on_unmatched_files: true
-          
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            output/simulador-vida.apk \
+            --title "Simulador de Vida ${GITHUB_REF_NAME}" \
+            --generate-notes
+            
